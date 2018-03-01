@@ -1,3 +1,153 @@
-public class Dequeue {
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
+public class Dequeue<Item> implements Iterable<Item> {
+    private Node first;
+
+    private Node last;
+
+    private int length = 0;
+
+    public void Deque() {
+
+    }
+
+    // is the deque empty?
+    public boolean isEmpty() {
+        return size() == 0;
+    }
+
+    // return the number of items on the deque
+    public int size()  {
+        return length;
+    }
+    public void addFirst(Item item)  {
+        Node itemNode = new Node(item, first);
+        first = itemNode;
+        if (last == null) {
+            last = first;
+        }
+        length++;
+    }
+
+    // add the item to the end
+    public void addLast(Item item) {
+        if (item == null) {
+            throw new IllegalArgumentException();
+        }
+
+        Node itemNode = new Node(item, null);
+        last.setNext(itemNode);
+        last = itemNode;
+        if (first == null) {
+            first = last;
+        }
+        length++;
+    }
+
+    // remove and return the item from the front
+    public Item removeFirst() {
+        if (isEmpty()) {
+            throw new NoSuchElementException();
+        }
+        Item firstItem = first.getValue();
+        first = first.getNext();
+        if (first == null) {
+            last = null;
+        }
+        length--;
+        return firstItem;
+    }
+
+    // remove and return the item from the end
+    public Item removeLast() {
+        if (isEmpty()) {
+            throw new NoSuchElementException();
+        }
+
+        Item lastItem = last.getValue();
+        Node newLast = getBeforeLast();
+        newLast.setNext(null);
+        last = newLast;
+        length--;
+
+        return lastItem;
+    }
+
+    private Node getBeforeLast() {
+        if (size() < 3) {
+            return first;
+        }
+        Node current = first;
+        Node last = current;
+        while (current.getNext() != null) {
+            last = current;
+            current = current.getNext();
+        }
+        return last;
+    }
+
+    // return an iterator over items in order from front to end
+    public Iterator<Item> iterator()  {
+        return new DequeueIterator();
+    }
+
+
+
+    public static void main(String[] args)  {
+
+    }
+
+    public class DequeueIterator implements Iterator<Item> {
+
+        private Node current;
+
+        public DequeueIterator() {
+            current = first;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return current.getNext() != null;
+        }
+
+        @Override
+        public Item next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+
+            Node item = current;
+            current = item.getNext();
+            return item.getValue();
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    private class Node {
+        private Item value;
+
+        private Node next;
+
+        public Node(Item value, Node next) {
+            this.value = value;
+            this.next = next;
+        }
+
+        public void setNext(Node next) {
+            this.next = next;
+        }
+
+        public Item getValue() {
+            return value;
+        }
+
+        public Node getNext() {
+            return next;
+        }
+    }
 }
