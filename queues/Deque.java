@@ -105,15 +105,15 @@ public class Deque<Item> implements Iterable<Item> {
 
     public static void main(String[] args)  {
         Deque<String> stringDeque = new Deque<>();
-//        stringDeque.addFirst("first");
-//        stringDeque.addFirst("the");
+        stringDeque.addFirst("first");
+        stringDeque.addFirst("the");
         stringDeque.addFirst("am");
-//        stringDeque.addFirst("I");
-//        stringDeque.addFirst("Yes");
+        stringDeque.addFirst("I");
+        stringDeque.addFirst("Yes");
         stringDeque.addLast("word");
-//        stringDeque.addLast("SIR");
-//        stringDeque.addLast("!");
-//        stringDeque.removeLast();
+        stringDeque.addLast("SIR");
+        stringDeque.addLast("!");
+        stringDeque.removeLast();
         stringDeque.removeFirst();
 
         StringBuilder sb = new StringBuilder();
