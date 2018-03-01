@@ -1,7 +1,7 @@
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class Dequeue<Item> implements Iterable<Item> {
+public class Deque<Item> implements Iterable<Item> {
     private Node first;
 
     private Node last;
@@ -22,6 +22,10 @@ public class Dequeue<Item> implements Iterable<Item> {
         return length;
     }
     public void addFirst(Item item)  {
+        if (item == null) {
+            throw new IllegalArgumentException();
+        }
+
         Node itemNode = new Node(item, first);
         first = itemNode;
         if (last == null) {
@@ -37,7 +41,10 @@ public class Dequeue<Item> implements Iterable<Item> {
         }
 
         Node itemNode = new Node(item, null);
-        last.setNext(itemNode);
+        if (last != null) {
+            last.setNext(itemNode);
+        }
+
         last = itemNode;
         if (first == null) {
             first = last;
@@ -66,20 +73,22 @@ public class Dequeue<Item> implements Iterable<Item> {
         }
 
         Item lastItem = last.getValue();
-        Node newLast = getBeforeLast();
-        newLast.setNext(null);
-        last = newLast;
+
+        last = getBeforeLast();
+        if (last == null) {
+            first = null;
+        }
+        else {
+            last.setNext(null);
+        }
         length--;
 
         return lastItem;
     }
 
     private Node getBeforeLast() {
-        if (size() < 3) {
-            return first;
-        }
         Node current = first;
-        Node last = current;
+        Node last = null;
         while (current.getNext() != null) {
             last = current;
             current = current.getNext();
@@ -95,7 +104,23 @@ public class Dequeue<Item> implements Iterable<Item> {
 
 
     public static void main(String[] args)  {
+        Deque<String> stringDeque = new Deque<>();
+//        stringDeque.addFirst("first");
+//        stringDeque.addFirst("the");
+        stringDeque.addFirst("am");
+//        stringDeque.addFirst("I");
+//        stringDeque.addFirst("Yes");
+        stringDeque.addLast("word");
+//        stringDeque.addLast("SIR");
+//        stringDeque.addLast("!");
+//        stringDeque.removeLast();
+        stringDeque.removeFirst();
 
+        StringBuilder sb = new StringBuilder();
+        for (String s : stringDeque) {
+            sb.append(" ").append(s);
+        }
+        System.out.println(sb.toString());
     }
 
     public class DequeueIterator implements Iterator<Item> {
@@ -108,7 +133,7 @@ public class Dequeue<Item> implements Iterable<Item> {
 
         @Override
         public boolean hasNext() {
-            return current.getNext() != null;
+            return current != null;
         }
 
         @Override
