@@ -34,7 +34,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         n += 1;
         elements[n-1] = item;
 
-        if (n>1) {
+        if (n > 1) {
             // switch the new item with a random position
             int idx = StdRandom.uniform(n);
             Item oldElement = elements[idx];
