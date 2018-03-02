@@ -19,8 +19,6 @@ public class Permutation {
             }
         }
 
-        System.out.println(String.valueOf(vals.size()));
-
         int k = Integer.valueOf(args[0]);
 
         for (int i = 0; i < k; i++) {
