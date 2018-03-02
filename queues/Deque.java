@@ -8,10 +8,6 @@ public class Deque<Item> implements Iterable<Item> {
 
     private int length = 0;
 
-    public void Deque() {
-
-    }
-
     // is the deque empty?
     public boolean isEmpty() {
         return size() == 0;
@@ -21,6 +17,7 @@ public class Deque<Item> implements Iterable<Item> {
     public int size()  {
         return length;
     }
+
     public void addFirst(Item item)  {
         if (item == null) {
             throw new IllegalArgumentException();
@@ -123,7 +120,7 @@ public class Deque<Item> implements Iterable<Item> {
         System.out.println(sb.toString());
     }
 
-    public class DequeueIterator implements Iterator<Item> {
+    private class DequeueIterator implements Iterator<Item> {
 
         private Node current;
 
