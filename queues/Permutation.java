@@ -1,5 +1,4 @@
 import edu.princeton.cs.algs4.StdIn;
-import edu.princeton.cs.algs4.StdRandom;
 
 public class Permutation {
     public static void main(String[] args) {
@@ -10,11 +9,22 @@ public class Permutation {
             throw new IllegalArgumentException("Length argument required");
         }
 
-        String[] val = StdIn.readAllStrings();
+        RandomizedQueue<String> vals = new RandomizedQueue<>();
+        while(StdIn.hasNextLine()) {
+            while(StdIn.hasNextChar()) {
+                if (StdIn.readChar() == '\n') {
+                    break;
+                }
+                vals.enqueue(StdIn.readString());
+            }
+        }
+
+        System.out.println(String.valueOf(vals.size()));
+
         int k = Integer.valueOf(args[0]);
 
         for (int i = 0; i < k; i++) {
-            System.out.println(val[StdRandom.uniform(k+1)]);
+            System.out.println(vals.sample());
         }
     }
 }
