@@ -31,13 +31,18 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         if (n == elements.length) {
             resize(elements.length*2);
         }
-        // insert the new item at a random position
-        int idx = n == 0 ? 0 : StdRandom.uniform(n);
-        Item oldElement = elements[idx];
+        n += 1;
+        elements[n-1] = item;
 
-        elements[n] = oldElement;
-        elements[idx] = item;
-        n++;
+        if (n>1) {
+            // switch the new item with a random position
+            int idx = StdRandom.uniform(n);
+            Item oldElement = elements[idx];
+            Item oldLastElement = elements[n-1];
+
+            elements[idx] = oldLastElement;
+            elements[n-1] = oldElement;
+        }
     }
 
     // remove and return a random item
@@ -50,7 +55,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         elements[n-1] = null;
         n--;
 
-        if (n <= (elements.length/4)) {
+        if (n > 0 && n == (elements.length/4)) {
             resize(elements.length/2);
         }
         return item;
@@ -81,36 +86,10 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     // unit testing (optional)
     public static void main(String[] args) {
         RandomizedQueue<String> rq = new RandomizedQueue<>();
-        rq.enqueue("the");
-        rq.enqueue("first");
-        rq.enqueue("word");
-        rq.enqueue("but");
-        rq.enqueue("not");
-        rq.enqueue("the");
-        rq.enqueue("last");
-        rq.enqueue("OK");
-        rq.enqueue("YEAH");
-        System.out.println(rq.size());
-
-        System.out.println("sample: "+ rq.sample());
-        System.out.println("dequeue: "+rq.dequeue());
-        System.out.println("dequeue: "+rq.dequeue());
-        System.out.println("dequeue: "+rq.dequeue());
-        System.out.println("dequeue: "+rq.dequeue());
-        System.out.println("dequeue: "+rq.dequeue());
-        System.out.println("dequeue: "+rq.dequeue());
-        System.out.println("dequeue: "+rq.dequeue());
-        System.out.println("dequeue: "+rq.dequeue());
-        System.out.println("dequeue: "+rq.dequeue());
-
-        rq.enqueue("HA");
-        rq.enqueue("JA");
-        rq.enqueue("DA");
-
-        System.out.println(rq.size());
-        for (String s : rq) {
-            System.out.println(s);
-        }
+        rq.enqueue("hello");
+        rq.enqueue("foo");
+        rq.enqueue("world");
+        rq.enqueue("bar");
     }
 
     @Override
