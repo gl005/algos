@@ -10,8 +10,8 @@ public class Permutation {
         }
 
         RandomizedQueue<String> vals = new RandomizedQueue<>();
-        while(StdIn.hasNextLine()) {
-            while(StdIn.hasNextChar()) {
+        while (StdIn.hasNextLine()) {
+            while (StdIn.hasNextChar()) {
                 if (StdIn.readChar() == '\n') {
                     break;
                 }
@@ -19,7 +19,7 @@ public class Permutation {
             }
         }
 
-        int k = Integer.valueOf(args[0]);
+        int k = Integer.parseInt(args[0]);
 
         for (int i = 0; i < k; i++) {
             System.out.println(vals.sample());

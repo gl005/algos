@@ -31,8 +31,8 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         if (n == elements.length) {
             resize(elements.length*2);
         }
-        //insert the new item at a random position
-        int idx = n == 0 ? 0: StdRandom.uniform(n);
+        // insert the new item at a random position
+        int idx = n == 0 ? 0 : StdRandom.uniform(n);
         Item oldElement = elements[idx];
 
         elements[n] = oldElement;
@@ -42,7 +42,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     // remove and return a random item
     public Item dequeue() {
-        if (n==0) {
+        if (n == 0) {
             throw new NoSuchElementException();
         }
 
@@ -57,7 +57,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     }
 
     public Item sample() {
-        if (n==0) {
+        if (n == 0) {
             throw new NoSuchElementException();
         }
         return elements[StdRandom.uniform(n)];

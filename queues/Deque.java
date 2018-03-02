@@ -85,12 +85,12 @@ public class Deque<Item> implements Iterable<Item> {
 
     private Node getBeforeLast() {
         Node current = first;
-        Node last = null;
+        Node lastOne = null;
         while (current.getNext() != null) {
-            last = current;
+            lastOne = current;
             current = current.getNext();
         }
-        return last;
+        return lastOne;
     }
 
     // return an iterator over items in order from front to end
@@ -151,7 +151,7 @@ public class Deque<Item> implements Iterable<Item> {
     }
 
     private class Node {
-        private Item value;
+        private final Item value;
 
         private Node next;
 
