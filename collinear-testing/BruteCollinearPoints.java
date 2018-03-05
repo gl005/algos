@@ -40,6 +40,7 @@ public class BruteCollinearPoints {
                     continue;
                 }
                 double slope = p.slopeTo(q);
+
             }
         }
     }
