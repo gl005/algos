@@ -1,3 +1,5 @@
+import edu.princeton.cs.algs4.StdDraw;
+
 import java.util.Comparator;
 
 public class Point implements Comparable<Point> {
@@ -12,16 +14,25 @@ public class Point implements Comparable<Point> {
        this.y = y;
     }
 
-    // draws this point
+    /**
+     * Draws this point to standard draw.
+     */
     public void draw() {
-
-
+        /* DO NOT MODIFY */
+        StdDraw.point(x, y);
     }
 
-    // draws the line segment from this point to that point
+    /**
+     * Draws the line segment between this point and the specified point
+     * to standard draw.
+     *
+     * @param that the other point
+     */
     public void drawTo(Point that) {
-
+        /* DO NOT MODIFY */
+        StdDraw.line(this.x, this.y, that.x, that.y);
     }
+
 
     public int getX() {
         return x;
