@@ -42,7 +42,7 @@ public class BruteCollinearPoints {
         numCombinations = numberOfCombinations();
     }
 
-    public Point[][] findSegments() {
+    private Point[][] findKCombinations() {
         //for all combinations of K=4 of the array, check if all points are collinear
         Point[][] subsets = new Point[numCombinations][K];
         int setIndex = 0;
@@ -70,31 +70,6 @@ public class BruteCollinearPoints {
             setIndex++;
         }
         return subsets;
-
-        /*
-        * def combinations(iterable, r):
-            # combinations('ABCD', 2) --> AB AC AD BC BD CD
-            # combinations(range(4), 3) --> 012 013 023 123
-            pool = tuple(iterable)
-            n = len(pool)
-            if r > n:
-                return
-            indices = list(range(r))
-            yield tuple(pool[i] for i in indices)
-            while True:
-                for i in reversed(range(r)):
-                    if indices[i] != i + n - r:
-                        break
-                else:
-                    return
-                indices[i] += 1
-                for j in range(i+1, r):
-                    indices[j] = indices[j-1] + 1
-                yield tuple(pool[i] for i in indices)
-
-        * */
-
-        // https://gist.github.com/axelpale/3118596
     }
 
     // generate actual subset by index sequence
@@ -135,13 +110,13 @@ public class BruteCollinearPoints {
         Point p8 = new Point(8,8);
 
         BruteCollinearPoints pfcp = new BruteCollinearPoints(new Point[]{p1, p2, p3, p4, p5, p6, p7, p8});
-        for (Point[] points : pfcp.findSegments()) {
-
-            for (Point point : points) {
-                System.out.print(point);
-            }
-            System.out.println("");
-        }
+//        for (Point[] points : pfcp.findSegments()) {
+//
+//            for (Point point : points) {
+//                System.out.print(point);
+//            }
+//            System.out.println("");
+//        }
 
 
     }
