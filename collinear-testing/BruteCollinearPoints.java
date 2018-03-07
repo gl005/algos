@@ -125,7 +125,7 @@ public class BruteCollinearPoints {
             }
 
             double newSlope = to.slopeTo(point);
-            if (newSlope != lastSlope && newSlope != -1*lastSlope) {
+            if (newSlope != lastSlope) {
                 return null;
             }
 
@@ -158,6 +158,7 @@ public class BruteCollinearPoints {
     }
 
     public static void main(String[] args) {
+
         Point p1 = new Point(3,3);
         Point p2 = new Point(5,7);
         Point p3 = new Point(4,4);
@@ -166,8 +167,13 @@ public class BruteCollinearPoints {
         Point p6 = new Point(1,6);
         Point p7 = new Point(7,7);
         Point p8 = new Point(3,8);
+        Point p9 = new Point(5, 3);
+        Point p10 = new Point(6, 3);
+        Point p11 = new Point(1, 3);
 
-        Point[] allPoints = new Point[]{p1, p2, p3, p4, p5, p6, p7, p8};
+        Point[] allPoints = new Point[]{p1, p2, p3, p4, p5, p6, p7, p9, p8, p11, p10};
+
+        double v = p6.slopeTo(p2);
 
         BruteCollinearPoints pfcp = new BruteCollinearPoints(allPoints);
         for (Point point : allPoints) {

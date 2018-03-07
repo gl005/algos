@@ -84,7 +84,7 @@ public class Point implements Comparable<Point> {
            return Double.POSITIVE_INFINITY;
         }
 
-        return changeInY/ changeInX;
+        return (double) changeInY/ changeInX;
     }
 
     // compare two points by slopes they make with this point
