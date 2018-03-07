@@ -1,13 +1,14 @@
-import java.util.ArrayList;
-import java.util.List;
-
 public class BruteCollinearPoints {
 
     private final Point[] points;
 
+    private LineSegment[] lineSegments;
+
     private final int numPoints;
 
     private final int numCombinations;
+
+    private int numCollinear = 0;
 
     private static final int K = 4;
     private static final int K_FACTORIAL = 24; // 4! = 24 hardcoded for convenience
@@ -40,12 +41,23 @@ public class BruteCollinearPoints {
         }
         numPoints = points.length;
         numCombinations = numberOfCombinations();
+        findSegments();
     }
 
-    private Point[][] findKCombinations() {
-        //for all combinations of K=4 of the array, check if all points are collinear
-        Point[][] subsets = new Point[numCombinations][K];
-        int setIndex = 0;
+    // the number of line segments
+    public int numberOfSegments() {
+        return numCollinear;
+    }
+
+    public LineSegment[] segments() {
+        return lineSegments;
+    }
+
+    // the line segments
+    public void findSegments() {
+        if (lineSegments != null) {
+            return;
+        }
 
         int[] s = new int[K];
         // first index sequence: 0, 1, 2, ...
@@ -53,8 +65,8 @@ public class BruteCollinearPoints {
             s[i] = i;
         }
 
-        subsets[setIndex] = getSubset(points, s);
-        setIndex++;
+        pushSegment(getSubset(points, s));
+
         for(;;) {
             int i;
             // find position of item that can be incremented
@@ -66,10 +78,65 @@ public class BruteCollinearPoints {
             for (++i; i < K; i++) {    // fill up remaining items
                 s[i] = s[i - 1] + 1;
             }
-            subsets[setIndex] = getSubset(points, s);
-            setIndex++;
+            //subsets[setIndex] = getSubset(points, s);
+            pushSegment(getSubset(points, s));
         }
-        return subsets;
+
+        //trim array
+        LineSegment[] temp = new LineSegment[numCollinear];
+        for (int i = 0; i < numCollinear; i++) {
+            temp[i] = lineSegments[i];
+        }
+        lineSegments = temp;
+    }
+
+    private void pushSegment(Point[] points) {
+        if (lineSegments == null) {
+            lineSegments = new LineSegment[numCombinations];
+        }
+
+        LineSegment collinear = collinear(points);
+        if (collinear != null) {
+            lineSegments[numCollinear] = collinear;
+            numCollinear++;
+        }
+    }
+
+    private LineSegment collinear(Point[] pointSet) {
+        Double lastSlope = null;
+        Point from = null;
+        Point to = null;
+        for (Point point : pointSet) {
+            if (from == null) {
+                from = point;
+                continue;
+            } else if (to == null) {
+                to = point;
+                if (!to.isGreatherThan(from)) {
+                    Point oldTo = to;
+                    to = from;
+                    from = oldTo;
+                }
+            }
+
+            if (lastSlope == null) {
+                lastSlope = from.slopeTo(to);
+                continue;
+            }
+
+            double newSlope = to.slopeTo(point);
+            if (newSlope != lastSlope && newSlope != -1*lastSlope) {
+                return null;
+            }
+
+            if (point.isGreatherThan(to)) {
+                to = point;
+            }
+            else if (from.isGreatherThan(point)) {
+                from = point;
+            }
+        }
+        return new LineSegment(from, to);
     }
 
     // generate actual subset by index sequence
@@ -90,34 +157,27 @@ public class BruteCollinearPoints {
         return permutations/ K_FACTORIAL;
     }
 
-    // the number of line segments
-    public int numberOfSegments() {
-        return 0;
-    }
-
-    // the line segments
-//    public LineSegment[] segments() {
-//    }
-
     public static void main(String[] args) {
-        Point p1 = new Point(1,1);
-        Point p2 = new Point(2,2);
-        Point p3 = new Point(3,3);
-        Point p4 = new Point(4,4);
-        Point p5 = new Point(5,5);
-        Point p6 = new Point(6,6);
+        Point p1 = new Point(3,3);
+        Point p2 = new Point(5,7);
+        Point p3 = new Point(4,4);
+        Point p4 = new Point(1,1);
+        Point p5 = new Point(5,1);
+        Point p6 = new Point(1,6);
         Point p7 = new Point(7,7);
-        Point p8 = new Point(8,8);
+        Point p8 = new Point(3,8);
 
-        BruteCollinearPoints pfcp = new BruteCollinearPoints(new Point[]{p1, p2, p3, p4, p5, p6, p7, p8});
-//        for (Point[] points : pfcp.findSegments()) {
-//
-//            for (Point point : points) {
-//                System.out.print(point);
-//            }
-//            System.out.println("");
-//        }
+        Point[] allPoints = new Point[]{p1, p2, p3, p4, p5, p6, p7, p8};
 
+        BruteCollinearPoints pfcp = new BruteCollinearPoints(allPoints);
+        for (Point point : allPoints) {
+            point.draw();
+        }
+
+        LineSegment[] segments = pfcp.segments();
+        for (LineSegment segment : segments) {
+            segment.draw();
+        }
 
     }
 }

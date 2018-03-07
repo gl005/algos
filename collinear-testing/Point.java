@@ -64,6 +64,10 @@ public class Point implements Comparable<Point> {
         }
     }
 
+    public boolean isGreatherThan(Point p) {
+        return p.getX() < getX() || p.getY() < getY();
+    }
+
     // the slope between this point and that point
     public double slopeTo(Point that) {
 
