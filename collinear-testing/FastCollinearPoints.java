@@ -74,9 +74,9 @@ public class FastCollinearPoints {
         Double firstSlope = null;
         Point p = points[0];
         Point t = new Point(0,0);
-        int i = 1;
+        int colinear = 0;
 
-        for (; i < numPoints; i++) {
+        for (int i = 0; i < numPoints; i++) {
             Point curPoint = points[i];
             double currentSlope = p.slopeTo(curPoint);
             if (firstSlope == null) {
@@ -86,7 +86,10 @@ public class FastCollinearPoints {
             }
 
             if (currentSlope != firstSlope) {
-                break;
+                continue;
+            }
+            else {
+                colinear++;
             }
 
             if (curPoint.isGreatherThan(t)) {
@@ -96,7 +99,7 @@ public class FastCollinearPoints {
                 p = curPoint;
             }
         }
-        if (i < 3) {
+        if (colinear < 3) {
             return null;
         }
         return new LineSegment(p, t);
@@ -118,7 +121,7 @@ public class FastCollinearPoints {
         Point p13 = new Point(15, 15); // a
 
 
-        Point[] allPoints = new Point[]{p1,p2,p3,p5,p6,p7,p8,p9,p11,p10, p12, p13};
+        Point[] allPoints = new Point[]{p1,p2,p3,p4,p5,p6,p7,p8,p9,p11,p10, p12, p13};
 
         FastCollinearPoints pfcp = new FastCollinearPoints(allPoints);
         LineSegment[] segments = pfcp.segments();
