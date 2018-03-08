@@ -100,6 +100,25 @@ public class FastCollinearPoints {
     }
 
     public static void main(String[] args) {
+        Point p1 = new Point(3,3);
+        Point p2 = new Point(5,7);
+        Point p3 = new Point(4,4);
+        Point p4 = new Point(1,1);
+        Point p5 = new Point(5,1);
+        Point p6 = new Point(6,6);
+        Point p7 = new Point(7,50);
+        Point p8 = new Point(3,8);
+        Point p9 = new Point(6, 3);
+        Point p10 = new Point(6, 1);
+        Point p11 = new Point(6, 2);
+        Point p12 = new Point(0, 0);
+        Point p13 = new Point(15, 15);
 
+
+        Point[] allPoints = new Point[]{p1,p2,p3,p4,p5,p6,p7,p8,p9,p11,p10, p12, p13};
+
+        BruteCollinearPoints pfcp = new BruteCollinearPoints(allPoints);
+        LineSegment[] segments = pfcp.segments();
+        int i = 0;
     }
 }
