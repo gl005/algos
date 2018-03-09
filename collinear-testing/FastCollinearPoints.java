@@ -6,7 +6,7 @@ public class FastCollinearPoints {
 
     private LineSegment[] lineSegments;
 
-    private int numCollinear = 0;
+    private int lineSegmentCount = 0;
 
     private int numPoints;
 
@@ -38,7 +38,7 @@ public class FastCollinearPoints {
     }
 
     public int numberOfSegments() {
-        return numCollinear;
+        return lineSegmentCount;
     }
 
     public LineSegment[] segments() {
@@ -51,58 +51,83 @@ public class FastCollinearPoints {
         for (Point point : copy) {
             System.out.println(point.toString());
             Arrays.sort(points, point.slopeOrder());
-            pushSegment(checkColinear());
+            pushSegment(findColinearPoints());
         }
 
-        lineSegments = Arrays.copyOfRange(lineSegments, 0, numCollinear);
+        lineSegments = Arrays.copyOfRange(lineSegments, 0, lineSegmentCount);
         return lineSegments;
     }
 
     private void pushSegment(LineSegment segment) {
         if (lineSegments == null) {
-            lineSegments = new LineSegment[numPoints/3];
+            lineSegments = new LineSegment[numPoints];
         }
 
-        if (segment!= null) {
-            lineSegments[numCollinear] = segment;
-            numCollinear++;
+        if (segment == null) {
+            return;
         }
+
+        lineSegments[lineSegmentCount] = segment;
+        lineSegmentCount++;
     }
 
-    public LineSegment checkColinear() {
+    public LineSegment findColinearPoints() {
 
-        Double firstSlope = null;
-        Point p = points[0];
-        Point t = new Point(0,0);
+        Double lastSlope = null;
+        Point start = points[0];
         int colinear = 0;
+        Point[] collinearPoints = new Point[10];
+
+        collinearPoints[0] = start;
 
         for (int i = 0; i < numPoints; i++) {
-            Point curPoint = points[i];
-            double currentSlope = p.slopeTo(curPoint);
-            if (firstSlope == null) {
-                t = curPoint;
-                firstSlope = currentSlope;
-                continue;
-            }
 
-            if (currentSlope != firstSlope) {
-                continue;
+            Point curPoint = points[i];
+            if (curPoint == start) continue;
+
+            double currentSlope = start.slopeTo(curPoint);
+
+            //new slope
+            if (lastSlope == null || currentSlope != lastSlope) {
+                //last slope had 3 or more collinear points, break iteration
+                if (colinear >= 2) {
+                    break;
+                }
+                colinear = 1;
+                lastSlope = currentSlope;
             }
             else {
                 colinear++;
             }
 
-            if (curPoint.isGreatherThan(t)) {
-                t = curPoint;
-            }
-            else if (p.isGreatherThan(curPoint)) {
-                p = curPoint;
-            }
+            collinearPoints[colinear] = curPoint;
         }
+
         if (colinear < 3) {
             return null;
         }
-        return new LineSegment(p, t);
+
+        return orderedSegment(collinearPoints);
+    }
+
+    private LineSegment orderedSegment(Point[] collinearPoints) {
+        Point startPoint = collinearPoints[0];
+        Point endPoint = collinearPoints[1];
+
+        //sort collinear points
+        for (Point collinearPoint : collinearPoints) {
+            if (collinearPoint == null) {
+                break;
+            }
+
+            if (collinearPoint.isGreatherThan(endPoint)) {
+                endPoint = collinearPoint;
+            }
+            else if (startPoint.isGreatherThan(collinearPoint)) {
+                startPoint = collinearPoint;
+            }
+        }
+        return new LineSegment(startPoint, endPoint);
     }
 
     public static void main(String[] args) {
@@ -125,6 +150,5 @@ public class FastCollinearPoints {
 
         FastCollinearPoints pfcp = new FastCollinearPoints(allPoints);
         LineSegment[] segments = pfcp.segments();
-        int i = 0;
     }
 }
