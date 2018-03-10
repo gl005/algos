@@ -33,15 +33,6 @@ public class Point implements Comparable<Point> {
         StdDraw.line(this.x, this.y, that.x, that.y);
     }
 
-
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
     // string representation
     public String toString() {
         return String.format("(%d,%d)", x, y);
@@ -49,23 +40,18 @@ public class Point implements Comparable<Point> {
 
     // compare two points by y-coordinates, breaking ties by x-coordinates
     public int compareTo(Point that) {
-        int diff = getY() - that.getY();
-        if (diff < 0) {
+        int yDiff = this.y - that.y;
+        int xDiff = this.x - that.x;
+
+        if (yDiff < 0 || xDiff < 0) {
             return -1;
         }
-        else if (diff == 0) {
-            if (getX() < that.getX()) {
-                return -1;
-            }
+        else if (yDiff == 0) {
             return 0;
         }
         else {
             return 1;
         }
-    }
-
-    public boolean isGreatherThan(Point p) {
-        return p.getX() < getX() || p.getY() < getY();
     }
 
     // the slope between this point and that point
@@ -74,8 +60,8 @@ public class Point implements Comparable<Point> {
         if (this.compareTo(that) == 0) {
             return Double.NEGATIVE_INFINITY;
         }
-        int changeInX = (that.getX() - getX());
-        int changeInY = (that.getY() - getY());
+        int changeInX = (that.x - this.x);
+        int changeInY = (that.y - this.y);
 
         if (changeInY == 0) {
             return 0;

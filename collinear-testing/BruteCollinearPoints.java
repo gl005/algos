@@ -54,7 +54,7 @@ public class BruteCollinearPoints {
     }
 
     // the line segments
-    public void findSegments() {
+    private void findSegments() {
         if (lineSegments != null) {
             return;
         }
@@ -112,7 +112,7 @@ public class BruteCollinearPoints {
                 continue;
             } else if (to == null) {
                 to = point;
-                if (!to.isGreatherThan(from)) {
+                if (to.compareTo(from) < 0) {
                     Point oldTo = to;
                     to = from;
                     from = oldTo;
@@ -131,10 +131,10 @@ public class BruteCollinearPoints {
                 return null;
             }
 
-            if (point.isGreatherThan(to)) {
+            if (point.compareTo(to) > 0) {
                 to = point;
             }
-            else if (from.isGreatherThan(point)) {
+            else if (point.compareTo(from) < 0) {
                 from = point;
             }
         }
@@ -176,13 +176,6 @@ public class BruteCollinearPoints {
         Point[] allPoints = new Point[]{p1,p2,p3,p4,p5,p6,p7,p8,p9,p11,p10};
 
         BruteCollinearPoints pfcp = new BruteCollinearPoints(allPoints);
-        for (Point point : allPoints) {
-            point.draw();
-        }
-
         LineSegment[] segments = pfcp.segments();
-        for (LineSegment segment : segments) {
-            segment.draw();
-        }
     }
 }

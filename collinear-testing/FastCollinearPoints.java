@@ -70,7 +70,7 @@ public class FastCollinearPoints {
         lineSegmentCount++;
     }
 
-    public LineSegment extractCollinearPoints() {
+    private LineSegment extractCollinearPoints() {
 
         Double lastSlope = null;
         Point start = points[0];
@@ -119,10 +119,10 @@ public class FastCollinearPoints {
                 break;
             }
 
-            if (collinearPoint.isGreatherThan(endPoint)) {
+            if (collinearPoint.compareTo(endPoint) > 0) {
                 endPoint = collinearPoint;
             }
-            else if (startPoint.isGreatherThan(collinearPoint)) {
+            else if (collinearPoint.compareTo(startPoint) < 0) {
                 startPoint = collinearPoint;
             }
         }
@@ -148,6 +148,7 @@ public class FastCollinearPoints {
         Point[] allPoints = new Point[]{p1,p2,p3,p4,p5,p6,p7,p8,p9,p11,p10, p12, p13};
 
         FastCollinearPoints pfcp = new FastCollinearPoints(allPoints);
-        pfcp.segments();
+        LineSegment[] segments = pfcp.segments();
+
     }
 }
