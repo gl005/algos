@@ -2,13 +2,13 @@ import java.util.Arrays;
 
 public class FastCollinearPoints {
 
-    private Point[] points;
+    private final Point[] points;
 
     private LineSegment[] lineSegments;
 
     private int lineSegmentCount = 0;
 
-    private int numPoints;
+    private final int numPoints;
 
     public FastCollinearPoints(Point[] points) {
         if (points == null) {
@@ -49,9 +49,8 @@ public class FastCollinearPoints {
         Point[] copy = Arrays.copyOf(points, numPoints);
 
         for (Point point : copy) {
-            System.out.println(point.toString());
             Arrays.sort(points, point.slopeOrder());
-            pushSegment(findColinearPoints());
+            pushSegment(extractCollinearPoints());
         }
 
         lineSegments = Arrays.copyOfRange(lineSegments, 0, lineSegmentCount);
@@ -71,7 +70,7 @@ public class FastCollinearPoints {
         lineSegmentCount++;
     }
 
-    public LineSegment findColinearPoints() {
+    public LineSegment extractCollinearPoints() {
 
         Double lastSlope = null;
         Point start = points[0];
@@ -87,9 +86,9 @@ public class FastCollinearPoints {
 
             double currentSlope = start.slopeTo(curPoint);
 
-            //new slope
+            // new slope
             if (lastSlope == null || currentSlope != lastSlope) {
-                //last slope had 3 or more collinear points, break iteration
+                // last slope had 3 or more collinear points, break iteration
                 if (colinear >= 2) {
                     break;
                 }
@@ -114,7 +113,7 @@ public class FastCollinearPoints {
         Point startPoint = collinearPoints[0];
         Point endPoint = collinearPoints[1];
 
-        //sort collinear points
+        // sort collinear points
         for (Point collinearPoint : collinearPoints) {
             if (collinearPoint == null) {
                 break;
@@ -149,6 +148,6 @@ public class FastCollinearPoints {
         Point[] allPoints = new Point[]{p1,p2,p3,p4,p5,p6,p7,p8,p9,p11,p10, p12, p13};
 
         FastCollinearPoints pfcp = new FastCollinearPoints(allPoints);
-        LineSegment[] segments = pfcp.segments();
+        pfcp.segments();
     }
 }

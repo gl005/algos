@@ -78,11 +78,11 @@ public class BruteCollinearPoints {
             for (++i; i < K; i++) {    // fill up remaining items
                 s[i] = s[i - 1] + 1;
             }
-            //subsets[setIndex] = getSubset(points, s);
+            // subsets[setIndex] = getSubset(points, s);
             pushSegment(getSubset(points, s));
         }
 
-        //trim array
+        // trim array
         LineSegment[] temp = new LineSegment[numCollinear];
         for (int i = 0; i < numCollinear; i++) {
             temp[i] = lineSegments[i];
@@ -95,14 +95,14 @@ public class BruteCollinearPoints {
             lineSegments = new LineSegment[numCombinations];
         }
 
-        LineSegment collinear = collinear(points);
+        LineSegment collinear = extractCollinearPoints(points);
         if (collinear != null) {
             lineSegments[numCollinear] = collinear;
             numCollinear++;
         }
     }
 
-    private LineSegment collinear(Point[] pointSet) {
+    private LineSegment extractCollinearPoints(Point[] pointSet) {
         Double firstSlope = null;
         Point from = null;
         Point to = null;
@@ -184,6 +184,5 @@ public class BruteCollinearPoints {
         for (LineSegment segment : segments) {
             segment.draw();
         }
-
     }
 }
