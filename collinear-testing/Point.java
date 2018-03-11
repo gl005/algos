@@ -40,24 +40,28 @@ public class Point implements Comparable<Point> {
 
     // compare two points by y-coordinates, breaking ties by x-coordinates
     public int compareTo(Point that) {
+        if (that == null) {
+            throw new NullPointerException();
+        }
+
         int yDiff = this.y - that.y;
         int xDiff = this.x - that.x;
 
-        if (yDiff < 0 || xDiff < 0) {
+        if (yDiff > 0 || xDiff > 0) {
+            return 1;
+        }
+        else if (yDiff < 0 || xDiff < 0) {
             return -1;
         }
-        else if (yDiff == 0) {
-            return 0;
-        }
         else {
-            return 1;
+            return 0;
         }
     }
 
     // the slope between this point and that point
     public double slopeTo(Point that) {
 
-        if (this.compareTo(that) == 0) {
+        if (this == that || (this.x == that.x && this.y == that.y)) {
             return Double.NEGATIVE_INFINITY;
         }
         int changeInX = (that.x - this.x);
@@ -88,7 +92,7 @@ public class Point implements Comparable<Point> {
             if (slope0To1 < slope0To2) {
                 return -1;
             }
-            else if (slope0To1 == slope0To2) {
+            else if ((slope0To1 - slope0To2) < 0.00001) {
                 return 0;
             }
             else {

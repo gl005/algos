@@ -1,4 +1,8 @@
+import java.util.Arrays;
+
 public class BruteCollinearPoints {
+
+    private static final int K = 4;
 
     private final Point[] points;
 
@@ -10,9 +14,6 @@ public class BruteCollinearPoints {
 
     private int numCollinear = 0;
 
-    private static final int K = 4;
-    private static final int K_FACTORIAL = 24; // 4! = 24 hardcoded for convenience
-
 
     // finds all line segments containing 4 points
     public BruteCollinearPoints(Point[] points) {
@@ -20,9 +21,11 @@ public class BruteCollinearPoints {
             throw new IllegalArgumentException("Points can not be null");
         }
 
-        this.points = points;
-        Point[] foundPoints = new Point[this.points.length];
-        for (int i = 0; i < this.points.length; i++) {
+        numPoints = points.length;
+        this.points = Arrays.copyOf(points, numPoints);
+        Point[] foundPoints = new Point[numPoints];
+
+        for (int i = 0; i < numPoints; i++) {
             Point point = this.points[i];
             if (point == null) {
                 throw new IllegalArgumentException("Null point");
@@ -39,7 +42,6 @@ public class BruteCollinearPoints {
             }
             foundPoints[i] = point;
         }
-        numPoints = points.length;
         numCombinations = numberOfCombinations();
         findSegments();
     }
@@ -50,7 +52,7 @@ public class BruteCollinearPoints {
     }
 
     public LineSegment[] segments() {
-        return lineSegments;
+        return Arrays.copyOf(lineSegments, numCollinear);
     }
 
     // the line segments
@@ -67,7 +69,7 @@ public class BruteCollinearPoints {
 
         pushSegment(getSubset(points, s));
 
-        for(;;) {
+        while (true) {
             int i;
             // find position of item that can be incremented
             for (i = K - 1; i >= 0 && s[i] == numPoints - K + i; i--);
@@ -90,12 +92,12 @@ public class BruteCollinearPoints {
         lineSegments = temp;
     }
 
-    private void pushSegment(Point[] points) {
+    private void pushSegment(Point[] pointSet) {
         if (lineSegments == null) {
             lineSegments = new LineSegment[numCombinations];
         }
 
-        LineSegment collinear = extractCollinearPoints(points);
+        LineSegment collinear = extractCollinearPoints(pointSet);
         if (collinear != null) {
             lineSegments[numCollinear] = collinear;
             numCollinear++;
@@ -125,9 +127,9 @@ public class BruteCollinearPoints {
             }
 
             double newSlope = to.slopeTo(point);
-            newSlope = newSlope == Double.NEGATIVE_INFINITY ? 0: newSlope;
+            newSlope = newSlope == Double.NEGATIVE_INFINITY ? 0 : newSlope;
 
-            if (newSlope != firstSlope) {
+            if (newSlope - firstSlope < 0.00001) {
                 return null;
             }
 
@@ -144,8 +146,9 @@ public class BruteCollinearPoints {
     // generate actual subset by index sequence
     private Point[] getSubset(Point[] input, int[] subset) {
         Point[] result = new Point[subset.length];
-        for (int i = 0; i < subset.length; i++)
+        for (int i = 0; i < subset.length; i++) {
             result[i] = input[subset[i]];
+        }
         return result;
     }
 
@@ -156,26 +159,10 @@ public class BruteCollinearPoints {
             int factor = numPoints-i;
             permutations = permutations * factor;
         }
-        return permutations/ K_FACTORIAL;
+        return permutations/ 24;
     }
 
+    // test method
     public static void main(String[] args) {
-
-        Point p1 = new Point(3,3);
-        Point p2 = new Point(5,7);
-        Point p3 = new Point(4,4);
-        Point p4 = new Point(1,1);
-        Point p5 = new Point(5,1);
-        Point p6 = new Point(6,6);
-        Point p7 = new Point(7,50);
-        Point p8 = new Point(3,8);
-        Point p9 = new Point(6, 3);
-        Point p10 = new Point(6, 1);
-        Point p11 = new Point(6, 2);
-
-        Point[] allPoints = new Point[]{p1,p2,p3,p4,p5,p6,p7,p8,p9,p11,p10};
-
-        BruteCollinearPoints pfcp = new BruteCollinearPoints(allPoints);
-        LineSegment[] segments = pfcp.segments();
     }
 }

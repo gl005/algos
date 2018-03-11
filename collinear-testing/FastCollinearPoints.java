@@ -14,10 +14,11 @@ public class FastCollinearPoints {
         if (points == null) {
             throw new IllegalArgumentException("Points can not be null");
         }
+        this.numPoints = points.length;
+        this.points = Arrays.copyOf(points, numPoints);
 
-        this.points = points;
-        Point[] foundPoints = new Point[this.points.length];
-        for (int i = 0; i < this.points.length; i++) {
+        Point[] foundPoints = new Point[numPoints];
+        for (int i = 0; i < numPoints; i++) {
             Point point = this.points[i];
             if (point == null) {
                 throw new IllegalArgumentException("Null point");
@@ -34,7 +35,6 @@ public class FastCollinearPoints {
             }
             foundPoints[i] = point;
         }
-        this.numPoints = points.length;
     }
 
     public int numberOfSegments() {
@@ -43,7 +43,7 @@ public class FastCollinearPoints {
 
     public LineSegment[] segments() {
         if (lineSegments != null) {
-            return lineSegments;
+            return Arrays.copyOf(lineSegments, lineSegmentCount);
         }
 
         Point[] copy = Arrays.copyOf(points, numPoints);
@@ -53,8 +53,7 @@ public class FastCollinearPoints {
             pushSegment(extractCollinearPoints());
         }
 
-        lineSegments = Arrays.copyOfRange(lineSegments, 0, lineSegmentCount);
-        return lineSegments;
+        return Arrays.copyOf(lineSegments, lineSegmentCount);
     }
 
     private void pushSegment(LineSegment segment) {
@@ -87,7 +86,7 @@ public class FastCollinearPoints {
             double currentSlope = start.slopeTo(curPoint);
 
             // new slope
-            if (lastSlope == null || currentSlope != lastSlope) {
+            if (lastSlope == null || (currentSlope - lastSlope) < 0.00001) {
                 // last slope had 3 or more collinear points, break iteration
                 if (colinear >= 2) {
                     break;
@@ -129,26 +128,7 @@ public class FastCollinearPoints {
         return new LineSegment(startPoint, endPoint);
     }
 
+    // test method
     public static void main(String[] args) {
-        Point p1 = new Point(3,3); // a
-        Point p2 = new Point(5,7);
-        Point p3 = new Point(4,4); // a
-        Point p4 = new Point(1,1); // a
-        Point p5 = new Point(5,1);
-        Point p6 = new Point(6,6); // a|b
-        Point p7 = new Point(7,50);
-        Point p8 = new Point(3,8);
-        Point p9 = new Point(6, 3); // b
-        Point p10 = new Point(6, 1); // b
-        Point p11 = new Point(6, 2); // b
-        Point p12 = new Point(0, 0); // a
-        Point p13 = new Point(15, 15); // a
-
-
-        Point[] allPoints = new Point[]{p1,p2,p3,p4,p5,p6,p7,p8,p9,p11,p10, p12, p13};
-
-        FastCollinearPoints pfcp = new FastCollinearPoints(allPoints);
-        LineSegment[] segments = pfcp.segments();
-
     }
 }
