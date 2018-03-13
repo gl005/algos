@@ -1,134 +1,90 @@
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Collections;
+import java.util.List;
+
+
 
 public class FastCollinearPoints {
 
-    private final Point[] points;
+    private HashMap<Double, List<Point>> foundSegments = new HashMap<>();
+    private List<LineSegment> segments = new ArrayList<>();
 
-    private LineSegment[] lineSegments;
-
-    private int lineSegmentCount = 0;
-
-    private final int numPoints;
 
     public FastCollinearPoints(Point[] points) {
-        if (points == null) {
-            throw new IllegalArgumentException("Points can not be null");
+        checkDuplicatedEntries(points);
+        Point[] pointsCopy = Arrays.copyOf(points, points.length);
+
+        for (Point startPoint : points) {
+            Arrays.sort(pointsCopy, startPoint.slopeOrder());
+
+            List<Point> slopePoints = new ArrayList<>();
+            double slope = 0;
+            double previousSlope = Double.NEGATIVE_INFINITY;
+
+            for (int i = 1; i < pointsCopy.length; i++) {
+                slope = startPoint.slopeTo(pointsCopy[i]);
+                if (slope == previousSlope) {
+                    slopePoints.add(pointsCopy[i]);
+                } else {
+                    if (slopePoints.size() >= 3) {
+                        slopePoints.add(startPoint);
+                        addSegmentIfNew(slopePoints, previousSlope);
+                    }
+                    slopePoints.clear();
+                    slopePoints.add(pointsCopy[i]);
+                }
+                previousSlope = slope;
+            }
+
+            if (slopePoints.size() >= 3) {
+                slopePoints.add(startPoint);
+                addSegmentIfNew(slopePoints, slope);
+            }
         }
-        this.numPoints = points.length;
-        this.points = Arrays.copyOf(points, numPoints);
+    }
 
-        Point[] foundPoints = new Point[numPoints];
-        for (int i = 0; i < numPoints; i++) {
-            Point point = this.points[i];
-            if (point == null) {
-                throw new IllegalArgumentException("Null point");
-            }
+    private void addSegmentIfNew(List<Point> slopePoints, double slope) {
+        List<Point> endPoints = foundSegments.get(slope);
+        Collections.sort(slopePoints);
 
-            // check if point is duplicate
-            for (Point foundPoint : foundPoints) {
-                if (foundPoint == null) {
-                    break;
-                }
-                if (foundPoint.equals(point)) {
-                    throw new IllegalArgumentException("Duplicate point: "+point.toString());
+        Point startPoint = slopePoints.get(0);
+        Point endPoint = slopePoints.get(slopePoints.size() - 1);
+
+        if (endPoints == null) {
+            endPoints = new ArrayList<>();
+            endPoints.add(endPoint);
+            foundSegments.put(slope, endPoints);
+            segments.add(new LineSegment(startPoint, endPoint));
+        } else {
+            for (Point currentEndPoint : endPoints) {
+                if (currentEndPoint.compareTo(endPoint) == 0) {
+                    return;
                 }
             }
-            foundPoints[i] = point;
+            endPoints.add(endPoint);
+            segments.add(new LineSegment(startPoint, endPoint));
+        }
+    }
+
+
+    private void checkDuplicatedEntries(Point[] points) {
+        for (int i = 0; i < points.length - 1; i++) {
+            for (int j = i + 1; j < points.length; j++) {
+                if (points[i].compareTo(points[j]) == 0) {
+                    throw new IllegalArgumentException("Duplicated entries in given points.");
+                }
+            }
         }
     }
 
     public int numberOfSegments() {
-        return lineSegmentCount;
+        return segments.size();
     }
 
     public LineSegment[] segments() {
-        if (lineSegments != null) {
-            return Arrays.copyOf(lineSegments, lineSegmentCount);
-        }
-
-        Point[] copy = Arrays.copyOf(points, numPoints);
-
-        for (Point point : copy) {
-            Arrays.sort(points, point.slopeOrder());
-            pushSegment(extractCollinearPoints());
-        }
-
-        return Arrays.copyOf(lineSegments, lineSegmentCount);
+        return segments.toArray(new LineSegment[segments.size()]);
     }
 
-    private void pushSegment(LineSegment segment) {
-        if (lineSegments == null) {
-            lineSegments = new LineSegment[numPoints];
-        }
-
-        if (segment == null) {
-            return;
-        }
-
-        lineSegments[lineSegmentCount] = segment;
-        lineSegmentCount++;
-    }
-
-    private LineSegment extractCollinearPoints() {
-
-        Double lastSlope = null;
-        Point start = points[0];
-        int colinear = 0;
-        Point[] collinearPoints = new Point[10];
-
-        collinearPoints[0] = start;
-
-        for (int i = 0; i < numPoints; i++) {
-
-            Point curPoint = points[i];
-            if (curPoint == start) continue;
-
-            double currentSlope = start.slopeTo(curPoint);
-
-            // new slope
-            if (lastSlope == null || (currentSlope - lastSlope) < 0.00001) {
-                // last slope had 3 or more collinear points, break iteration
-                if (colinear >= 2) {
-                    break;
-                }
-                colinear = 1;
-                lastSlope = currentSlope;
-            }
-            else {
-                colinear++;
-            }
-
-            collinearPoints[colinear] = curPoint;
-        }
-
-        if (colinear < 3) {
-            return null;
-        }
-
-        return orderedSegment(collinearPoints);
-    }
-
-    private LineSegment orderedSegment(Point[] collinearPoints) {
-        Point startPoint = collinearPoints[0];
-        Point endPoint = collinearPoints[1];
-
-        // sort collinear points
-        for (Point collinearPoint : collinearPoints) {
-            if (collinearPoint == null) {
-                break;
-            }
-
-            if (collinearPoint.compareTo(endPoint) > 0) {
-                endPoint = collinearPoint;
-            }
-            else if (collinearPoint.compareTo(startPoint) < 0) {
-                startPoint = collinearPoint;
-            }
-        }
-        return new LineSegment(startPoint, endPoint);
-    }
-
-    // test method
-    public static void main(String[] args) {
-    }
 }
