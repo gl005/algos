@@ -14,7 +14,7 @@ public class FastCollinearPoints {
         if (points == null) {
             throw new IllegalArgumentException();
         }
-        checkDuplicatedEntries(points);
+        checkDuplicateEntries(points);
 
         Point[] pointsCopy = Arrays.copyOf(points, points.length);
         Point[] sortingCopy = Arrays.copyOf(points, points.length);
@@ -51,8 +51,6 @@ public class FastCollinearPoints {
         if (collinearPoints.size() < 4) {
             return;
         }
-        System.out.println("found segment with "+collinearPoints.size()+ " points");
-
         pushSegment(orderedSegment(collinearPoints));
     }
 
@@ -84,7 +82,7 @@ public class FastCollinearPoints {
     }
 
 
-    private void checkDuplicatedEntries(Point[] points) {
+    private void checkDuplicateEntries(Point[] points) {
         for (int i = 0; i < points.length; i++) {
             if (points[i] == null) {
                 throw new IllegalArgumentException("Points can not be null");

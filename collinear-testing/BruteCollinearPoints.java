@@ -11,7 +11,7 @@ public class BruteCollinearPoints {
         if (points == null) {
             throw new IllegalArgumentException();
         }
-        checkDuplicatedEntries(points);
+        checkDuplicateEntries(points);
         ArrayList<LineSegment> foundSegments = new ArrayList<>();
 
         Point[] pointsCopy = Arrays.copyOf(points, points.length);
@@ -41,7 +41,7 @@ public class BruteCollinearPoints {
         return Arrays.copyOf(segments, numberOfSegments());
     }
 
-    private void checkDuplicatedEntries(Point[] points) {
+    private void checkDuplicateEntries(Point[] points) {
         for (int i = 0; i < points.length; i++) {
             if (points[i] == null) {
                 throw new IllegalArgumentException("Points can not be null");
