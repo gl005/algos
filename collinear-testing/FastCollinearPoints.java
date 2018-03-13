@@ -1,77 +1,101 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Collections;
 import java.util.List;
+import java.util.Arrays;
+import java.util.ArrayList;
 
 
 
 public class FastCollinearPoints {
 
-    private HashMap<Double, List<Point>> foundSegments = new HashMap<>();
-    private List<LineSegment> segments = new ArrayList<>();
+    private final List<LineSegment> segments = new ArrayList<>();
 
+    private final List<String> segmentsFound = new ArrayList<>();
 
     public FastCollinearPoints(Point[] points) {
+        if (points == null) {
+            throw new IllegalArgumentException();
+        }
         checkDuplicatedEntries(points);
+
         Point[] pointsCopy = Arrays.copyOf(points, points.length);
+        Point[] sortingCopy = Arrays.copyOf(points, points.length);
 
-        for (Point startPoint : points) {
-            Arrays.sort(pointsCopy, startPoint.slopeOrder());
-
-            List<Point> slopePoints = new ArrayList<>();
-            double slope = 0;
-            double previousSlope = Double.NEGATIVE_INFINITY;
-
-            for (int i = 1; i < pointsCopy.length; i++) {
-                slope = startPoint.slopeTo(pointsCopy[i]);
-                if (slope == previousSlope) {
-                    slopePoints.add(pointsCopy[i]);
-                } else {
-                    if (slopePoints.size() >= 3) {
-                        slopePoints.add(startPoint);
-                        addSegmentIfNew(slopePoints, previousSlope);
-                    }
-                    slopePoints.clear();
-                    slopePoints.add(pointsCopy[i]);
-                }
-                previousSlope = slope;
-            }
-
-            if (slopePoints.size() >= 3) {
-                slopePoints.add(startPoint);
-                addSegmentIfNew(slopePoints, slope);
-            }
+        for (Point point : pointsCopy) {
+            Arrays.sort(sortingCopy, point.slopeOrder());
+            extractCollinearPoints(sortingCopy);
         }
     }
 
-    private void addSegmentIfNew(List<Point> slopePoints, double slope) {
-        List<Point> endPoints = foundSegments.get(slope);
-        Collections.sort(slopePoints);
+    private void extractCollinearPoints(Point[] points) {
+        Double lastSlope = null;
+        Point start = points[0];
 
-        Point startPoint = slopePoints.get(0);
-        Point endPoint = slopePoints.get(slopePoints.size() - 1);
+        List<Point> collinearPoints = new ArrayList<>();
 
-        if (endPoints == null) {
-            endPoints = new ArrayList<>();
-            endPoints.add(endPoint);
-            foundSegments.put(slope, endPoints);
-            segments.add(new LineSegment(startPoint, endPoint));
-        } else {
-            for (Point currentEndPoint : endPoints) {
-                if (currentEndPoint.compareTo(endPoint) == 0) {
-                    return;
+        for (int i = 1; i < points.length; i++) {
+            Point curPoint = points[i];
+            double currentSlope = start.slopeTo(curPoint);
+
+            // new slope
+            if (lastSlope == null || currentSlope != lastSlope) {
+                // last slope had 3 or more collinear points, break iteration
+                if (collinearPoints.size() > 3) {
+                    break;
                 }
+                lastSlope = currentSlope;
+                collinearPoints = new ArrayList<>();
+                collinearPoints.add(start);
             }
-            endPoints.add(endPoint);
-            segments.add(new LineSegment(startPoint, endPoint));
+
+            collinearPoints.add(curPoint);
         }
+        if (collinearPoints.size() < 4) {
+            return;
+        }
+        System.out.println("found segment with "+collinearPoints.size()+ " points");
+
+        pushSegment(orderedSegment(collinearPoints));
+    }
+
+    private LineSegment orderedSegment(List<Point> collinearPoints) {
+        Point startPoint = collinearPoints.get(0);
+        Point endPoint = collinearPoints.get(1);
+
+        // find out which 2 points are the outliers and use them as from and to points of the line segment
+        for (Point collinearPoint : collinearPoints) {
+            if (collinearPoint == null) {
+                break;
+            }
+
+            if (collinearPoint.compareTo(endPoint) > 0) {
+                endPoint = collinearPoint;
+            } else if (collinearPoint.compareTo(startPoint) < 0) {
+                startPoint = collinearPoint;
+            }
+        }
+        return new LineSegment(startPoint, endPoint);
+    }
+
+    private void pushSegment(LineSegment segment) {
+        if (segment == null || segmentsFound.contains(segment.toString())) {
+            return;
+        }
+        segments.add(segment);
+        segmentsFound.add(segment.toString());
     }
 
 
     private void checkDuplicatedEntries(Point[] points) {
-        for (int i = 0; i < points.length - 1; i++) {
+        for (int i = 0; i < points.length; i++) {
+            if (points[i] == null) {
+                throw new IllegalArgumentException("Points can not be null");
+            }
+            if (i == points.length -1) {
+                break;
+            }
             for (int j = i + 1; j < points.length; j++) {
+                if (points[j] == null) {
+                    throw new IllegalArgumentException("Points can not be null");
+                }
                 if (points[i].compareTo(points[j]) == 0) {
                     throw new IllegalArgumentException("Duplicated entries in given points.");
                 }
@@ -84,7 +108,21 @@ public class FastCollinearPoints {
     }
 
     public LineSegment[] segments() {
-        return segments.toArray(new LineSegment[segments.size()]);
+        return segments.toArray(new LineSegment[numberOfSegments()]);
     }
 
+
+//    public static void main(String[] args) {
+//        Point p1 = new Point(10,10);
+//        Point p2 = new Point(5,5);
+//        Point p3 = new Point(8,8);
+//        Point p4 = new Point(19,19);
+//        Point p5 = new Point(7,6);
+//        Point p6 = new Point(7,7);
+//        Point p7 = new Point(7,3);
+//        Point p8 = new Point(7,1);
+//        Point p9 = new Point(8,1);
+//        Point p10 = new Point(9,1);
+//        FastCollinearPoints fcp = new FastCollinearPoints(new Point[] {p1, p2, p3, p4, p5, p6, p7, p8, p9, p10});
+//    }
 }

@@ -4,10 +4,13 @@ import java.util.Arrays;
 
 public class BruteCollinearPoints {
 
-    private LineSegment[] segments;
+    private final LineSegment[] segments;
 
 
     public BruteCollinearPoints(Point[] points) {
+        if (points == null) {
+            throw new IllegalArgumentException();
+        }
         checkDuplicatedEntries(points);
         ArrayList<LineSegment> foundSegments = new ArrayList<>();
 
@@ -39,10 +42,20 @@ public class BruteCollinearPoints {
     }
 
     private void checkDuplicatedEntries(Point[] points) {
-        for (int i = 0; i < points.length - 1; i++) {
+        for (int i = 0; i < points.length; i++) {
+            if (points[i] == null) {
+                throw new IllegalArgumentException("Points can not be null");
+            }
+            if (i == points.length-1) {
+                break;
+            }
+
             for (int j = i + 1; j < points.length; j++) {
+                if (points[j] == null) {
+                    throw new IllegalArgumentException("Points can not be null");
+                }
                 if (points[i].compareTo(points[j]) == 0) {
-                    throw new IllegalArgumentException();
+                    throw new IllegalArgumentException("Duplicated entries in given points.");
                 }
             }
         }
