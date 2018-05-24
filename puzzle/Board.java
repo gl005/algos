@@ -31,9 +31,13 @@ public class Board {
     // is this board the goal board?
     public boolean isGoal() {
         int i = 1;
-        for (int[] column : blocks) {
-            for (int cell : column) {
-                if (cell != i) {
+        int lastIndex = (dimension*dimension)-1;
+        for (int[] row : blocks) {
+            for (int cell : row) {
+                if (i == lastIndex) {
+                    i = 0;
+                }
+                else if (i != cell) {
                     return false;
                 }
                 else {
@@ -69,10 +73,11 @@ public class Board {
 
     // unit tests (not graded)
     public static void main(String[] args) {
-        Board a = new Board(new int[][]{{0,4,8,12},{1,5,9,13},{2,6,10,14},{3,7,10,15}});
-        Board b = new Board(new int[][]{{0,4,8,12},{1,5,9,13},{2,6,10,14},{3,7,10,15}});
+        Board a = new Board(new int[][]{{1,2,3,4},{5,6,7,8},{9,10,11,12},{13,14,15,0}});
+        Board b = new Board(new int[][]{{1,2,3,4},{5,6,7,8},{9,10,11,12},{13,14,15,0}});
 
         System.out.println(a.equals(b));
+        System.out.println(a.isGoal());
     }
 
     private int[][] deepCopy(int[][] original) {
