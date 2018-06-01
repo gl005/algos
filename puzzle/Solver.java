@@ -39,8 +39,7 @@ public class Solver {
         while (!frontier.isEmpty()) {
             currentNode = frontier.delMin();
             for (Board neighbour : currentNode.getBoard().neighbors()) {
-                if (currentNode.getBoard().equals(neighbour) ||
-                        (currentNode.getPrevious() != null && currentNode.getPrevious().getBoard().equals(neighbour))) {
+                if (currentNode.getPrevious() != null && currentNode.getPrevious().getBoard().equals(neighbour)) {
                     continue;
                 }
 
@@ -52,7 +51,7 @@ public class Solver {
                 }
 
                 SearchNode nextNode = new SearchNode(neighbour, currentNode.isTwin() ? twinStep: step, currentNode.isTwin(), currentNode);
-                // todo: check if node has been visited before adding it to the frontier, pretty hard if it's not allowed to implement hashCode
+                // todo: check if node has been visited before adding it to the frontier, pretty hard if we're not allowed to implement hashCode
                 frontier.insert(nextNode);
 
                 if (nextNode.isGoalNode()) {
@@ -97,7 +96,7 @@ public class Solver {
 
     // solve a slider puzzle (given below)
     public static void main(String[] args) {
-        //testPuzzle(new Board(new int[][]{{0,1,3},{4,2,5},{7,8,6}}));
+        testPuzzle(new Board(new int[][]{{0,1,3},{4,2,5},{7,8,6}}));
 
         //unsolvable
         testPuzzle(new Board(new int[][]{{1,2,3},{4,5,6},{8,7,0}}));
@@ -105,7 +104,7 @@ public class Solver {
 
     private static void testPuzzle(Board board) {
         Solver solver = new Solver(board);
-        System.out.println(solver.isSolvable());
+        System.out.println("solvable? " + solver.isSolvable());
         if (!solver.isSolvable()) return;
         for (Board solutionStep : solver.solution()) {
             System.out.println(solutionStep);
