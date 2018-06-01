@@ -13,6 +13,7 @@ public class Solver {
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
+        if (initial == null) throw new IllegalArgumentException();
         this.initialBoard = initial;
         solvePuzzle();
     }
@@ -40,12 +41,11 @@ public class Solver {
         while (!frontier.isEmpty()) {
             currentNode = frontier.delMin();
             for (Board nextBoard : currentNode.getBoard().neighbors()) {
-                if (currentNode.getPrevious() != null && currentNode.getPrevious().getBoard().equals(nextBoard)) {
+                if ((currentNode.getPrevious() != null && currentNode.getPrevious().getBoard().equals(nextBoard)) || currentNode.descendsFrom(nextBoard)) {
                     continue;
                 }
 
                 SearchNode nextNode = new SearchNode(nextBoard, currentNode.isTwin(), currentNode);
-                // todo: check if node has been visited before adding it to the frontier, pretty hard if we're not allowed to implement hashCode
                 frontier.insert(nextNode);
 
                 if (nextNode.isGoalNode()) {
@@ -65,27 +65,20 @@ public class Solver {
 
     // min number of moves to solve initial board; -1 if unsolvable
     public int moves() {
-        ArrayDeque<Board> steps = composeSolution();
+        ArrayDeque<Board> steps = getSolution();
         return solvable && steps != null ? (steps.size() - 1) : -1;
     }
 
     // sequence of boards in a shortest solution; null if unsolvable
     public Iterable<Board> solution() {
-        return composeSolution();
+        return getSolution();
     }
 
-    private ArrayDeque<Board> composeSolution() {
+    private ArrayDeque<Board> getSolution() {
         if (!solvable) {
             return null;
         }
-        ArrayDeque<Board> solution = new ArrayDeque<>();
-        SearchNode current = goalNode;
-        while (!current.isStartNode()) {
-            solution.addFirst(current.getBoard());
-            current = current.getPrevious();
-        }
-        solution.addFirst(current.getBoard());
-        return solution;
+        return goalNode.ancestors();
     }
 
     // solve a slider puzzle (given below)
@@ -141,14 +134,36 @@ public class Solver {
             return manhattenPriority;
         }
 
+        boolean descendsFrom(Board board) {
+            SearchNode node = this;
+            while (node.previous != null) {
+                if (node.previous.equals(board)) {
+                    return true;
+                }
+                node = node.previous;
+            }
+            return false;
+        }
+
         int depth() {
             int curStep = 0;
             SearchNode node = this;
-            while(node.previous != null) {
+            while (node.previous != null) {
                 curStep++;
                 node = node.previous;
             }
             return curStep;
+        }
+
+        ArrayDeque<Board> ancestors() {
+            ArrayDeque<Board> ancestors = new ArrayDeque<>();
+            SearchNode current = goalNode;
+            while (!current.isStartNode()) {
+                ancestors.addFirst(current.getBoard());
+                current = current.getPrevious();
+            }
+            ancestors.addFirst(current.getBoard());
+            return ancestors;
         }
     }
 }

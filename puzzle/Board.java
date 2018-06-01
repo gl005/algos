@@ -15,10 +15,11 @@ public class Board {
     // construct a board from an n-by-n array of blocks
     // (where blocks[i][j] = block in row i, column j)
     public Board(int[][] blocks)  {
+        if (blocks == null) throw new IllegalArgumentException();
         this.blocks = deepCopy(blocks);
         this.dimension = this.blocks.length;
-        int hamming = 0;
-        int manhattanDistance = 0;
+        int hammingCode = 0;
+        int manhattanDistanceTotal = 0;
 
         for (int y = 0; y < dimension; y++) {
             for (int x = 0; x < dimension; x++) {
@@ -34,13 +35,13 @@ public class Board {
                 targetX = getValueTargetX(value, targetY);
 
                 if ((targetY != y || targetX != x) && value != 0) {
-                    manhattanDistance += Math.abs(targetX - x) + Math.abs(targetY - y);
-                    hamming += 1;
+                    manhattanDistanceTotal += Math.abs(targetX - x) + Math.abs(targetY - y);
+                    hammingCode += 1;
                 }
             }
         }
-        this.hamming = hamming;
-        this.manhattanDistance = manhattanDistance;
+        this.hamming = hammingCode;
+        this.manhattanDistance = manhattanDistanceTotal;
     }
 
     // board dimension n
