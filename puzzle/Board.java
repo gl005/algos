@@ -1,4 +1,6 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Board {
 
@@ -8,7 +10,7 @@ public class Board {
     private final int[][] blocks;
     private final int dimension;
     private final List<Integer> manhattanDistances = new ArrayList<>();
-    private final String stringValue;
+    private final StringBuilder stringBuilder;
 
     // construct a board from an n-by-n array of blocks
     // (where blocks[i][j] = block in row i, column j)
@@ -22,7 +24,7 @@ public class Board {
             for (int x = 0; x < dimension; x++) {
                 int value = this.blocks[y][x];
                 int targetY, targetX;
-                sb.append(value == 0 ? " ": value).append("\t");
+                sb.append(value == 0 ? " " : value).append("\t");
 
                 if (value == 0) {
                     this.blankX = x;
@@ -39,7 +41,7 @@ public class Board {
             }
             sb.append("\n");
         }
-        stringValue = sb.toString();
+        stringBuilder = sb;
     }
 
     // board dimension n
@@ -55,7 +57,7 @@ public class Board {
     // sum of Manhattan distances between blocks and goal
     public int manhattan() {
         int sum = 0;
-        for (int distance: manhattanDistances) {
+        for (int distance : manhattanDistances) {
             sum += distance;
         }
         return sum;
@@ -97,19 +99,19 @@ public class Board {
     public Iterable<Board> neighbors() {
         List<Board> neighbours = new ArrayList<>(4);
 
-        //check lower neighbour
+        // check lower neighbour
         if (blankY < dimension-1) {
             neighbours.add(swap(blankY, blankX,  blankY+1, blankX));
         }
-        //check upper neighbour
+        // check upper neighbour
         if (blankY > 0) {
             neighbours.add(swap(blankY, blankX, blankY-1, blankX));
         }
-        //check right neighbour
+        // check right neighbour
         if (blankX < dimension-1) {
             neighbours.add(swap(blankY, blankX, blankY, blankX+1));
         }
-        //check left neighbour
+        // check left neighbour
         if (blankX > 0) {
             neighbours.add(swap(blankY, blankX, blankY, blankX - 1));
         }
@@ -122,17 +124,16 @@ public class Board {
         if (y == null || getClass() != y.getClass()) {
             return false;
         }
-        //return this == y || Arrays.deepEquals(blocks, ((Board)y).blocks);
-        return this == y || ((Board)y).getHash().equals(getHash());
+        return this == y || ((Board) y).getHash().equals(getHash());
     }
 
     private String getHash() {
-        return stringValue.replaceAll("/\n\t /", "");
+        return stringBuilder.toString().replaceAll("/\n\t /", "");
     }
 
     // string representation of this board (in the output format specified below)
     public String toString() {
-       return stringValue;
+       return stringBuilder.toString();
     }
 
     private int getValueTargetX(int value, int targetY) {
@@ -145,9 +146,9 @@ public class Board {
 
     private int getValueTargetY(int value) {
         if (value == 0) {
-            return dimension-1;
+            return dimension - 1;
         }
-        return (int)Math.ceil(value / (double)dimension) -1;
+        return (int) Math.ceil(value / (double) dimension) -1;
     }
 
     private Board swap(int fromY, int fromX, int toY, int toX) {
@@ -175,20 +176,22 @@ public class Board {
 
     // unit tests (not graded)
     public static void main(String[] args) {
+        /*
         Board a = new Board(new int[][]{{0,1,3},{4,2,5},{7,8,6}});
 
         System.out.print(a.toString());
-        System.out.println("steps to goal: "+a.manhattan());
-        System.out.println("blocks out of place: "+a.hamming());
-        System.out.println("is goal: "+a.isGoal());
+        System.out.println("steps to goal: " + a.manhattan());
+        System.out.println("blocks out of place: " + a.hamming());
+        System.out.println("is goal: " + a.isGoal());
         System.out.println(" ");
 
         for (Board board : a.neighbors()) {
             System.out.print(board.toString());
             //System.out.println("is goal: "+board.isGoal());
-            System.out.println("steps to goal: "+board.manhattan());
-            System.out.println("blocks out of place: "+board.hamming());
+            System.out.println("steps to goal: " + board.manhattan());
+            System.out.println("blocks out of place: " + board.hamming());
             System.out.println(" ");
         }
+        */
     }
 }

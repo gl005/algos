@@ -1,22 +1,23 @@
 import edu.princeton.cs.algs4.MinPQ;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Comparator;
 
 public class Solver {
 
-    private final Board initialBoard;
-
-    private SearchNode goalNode;
-
-    private boolean solvable = false;
-
-    private final static Comparator<SearchNode> MANHATTAN_COMPARATOR = (nodeA, nodeB) -> {
+    private static final Comparator<SearchNode> MANHATTAN_COMPARATOR = (nodeA, nodeB) -> {
         int manhattanResult = Comparator.comparingInt(SearchNode::getManhattanPriority).compare(nodeA, nodeB);
         if (manhattanResult == 0) {
             return Comparator.comparingInt(SearchNode::getHammingPriority).compare(nodeA, nodeB);
         }
         return manhattanResult;
     };
+
+    private final Board initialBoard;
+
+    private SearchNode goalNode;
+
+    private boolean solvable = false;
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
@@ -50,7 +51,7 @@ public class Solver {
                     step++;
                 }
 
-                SearchNode nextNode = new SearchNode(neighbour, currentNode.isTwin() ? twinStep: step, currentNode.isTwin(), currentNode);
+                SearchNode nextNode = new SearchNode(neighbour, currentNode.isTwin() ? twinStep : step, currentNode.isTwin(), currentNode);
                 // todo: check if node has been visited before adding it to the frontier, pretty hard if we're not allowed to implement hashCode
                 frontier.insert(nextNode);
 
@@ -71,8 +72,8 @@ public class Solver {
 
     // min number of moves to solve initial board; -1 if unsolvable
     public int moves() {
-        Deque<Board> steps = composeSolution();
-        return solvable && steps != null ? (steps.size() - 1): -1;
+        ArrayDeque<Board> steps = composeSolution();
+        return solvable && steps != null ? (steps.size() - 1) : -1;
     }
 
     // sequence of boards in a shortest solution; null if unsolvable
@@ -80,13 +81,13 @@ public class Solver {
         return composeSolution();
     }
 
-    private Deque<Board> composeSolution() {
+    private ArrayDeque<Board> composeSolution() {
         if (!solvable) {
             return null;
         }
-        Deque<Board> solution = new Deque<>();
+        ArrayDeque<Board> solution = new ArrayDeque<>();
         SearchNode current = goalNode;
-        while(!current.isStartNode()) {
+        while (!current.isStartNode()) {
             solution.addFirst(current.getBoard());
             current = current.getPrevious();
         }
@@ -96,10 +97,9 @@ public class Solver {
 
     // solve a slider puzzle (given below)
     public static void main(String[] args) {
-        testPuzzle(new Board(new int[][]{{0,1,3},{4,2,5},{7,8,6}}));
-
-        //unsolvable
-        testPuzzle(new Board(new int[][]{{1,2,3},{4,5,6},{8,7,0}}));
+        // testPuzzle(new Board(new int[][]{{0,1,3},{4,2,5},{7,8,6}}));
+        // unsolvable
+        // testPuzzle(new Board(new int[][]{{1,2,3},{4,5,6},{8,7,0}}));
     }
 
     private static void testPuzzle(Board board) {
