@@ -9,22 +9,21 @@ public class Board {
 
     private final int[][] blocks;
     private final int dimension;
-    private final List<Integer> manhattanDistances = new ArrayList<>();
-    private final StringBuilder stringBuilder;
+    private final int manhattanDistance;
+    private final int hamming;
 
     // construct a board from an n-by-n array of blocks
     // (where blocks[i][j] = block in row i, column j)
     public Board(int[][] blocks)  {
         this.blocks = deepCopy(blocks);
         this.dimension = this.blocks.length;
+        int hamming = 0;
+        int manhattanDistance = 0;
 
-        StringBuilder sb = new StringBuilder();
-        sb.append(dimension).append("\n");
         for (int y = 0; y < dimension; y++) {
             for (int x = 0; x < dimension; x++) {
                 int value = this.blocks[y][x];
                 int targetY, targetX;
-                sb.append(value == 0 ? " " : value).append("\t");
 
                 if (value == 0) {
                     this.blankX = x;
@@ -34,14 +33,14 @@ public class Board {
                 targetY = getValueTargetY(value);
                 targetX = getValueTargetX(value, targetY);
 
-                if (targetY != y || targetX != x) {
-                    int manhattanDistance = Math.abs(targetX - x) + Math.abs(targetY - y);
-                    manhattanDistances.add(manhattanDistance);
+                if ((targetY != y || targetX != x) && value != 0) {
+                    manhattanDistance += Math.abs(targetX - x) + Math.abs(targetY - y);
+                    hamming += 1;
                 }
             }
-            sb.append("\n");
         }
-        stringBuilder = sb;
+        this.hamming = hamming;
+        this.manhattanDistance = manhattanDistance;
     }
 
     // board dimension n
@@ -51,21 +50,17 @@ public class Board {
 
     // number of blocks out of place
     public int hamming() {
-        return manhattanDistances.size();
+        return hamming;
     }
 
     // sum of Manhattan distances between blocks and goal
     public int manhattan() {
-        int sum = 0;
-        for (int distance : manhattanDistances) {
-            sum += distance;
-        }
-        return sum;
+        return manhattanDistance;
     }
 
     // is this board the goal board?
     public boolean isGoal() {
-        return manhattanDistances.isEmpty();
+        return hamming == 0;
     }
 
     // a board that is obtained by exchanging any pair of blocks
@@ -124,16 +119,34 @@ public class Board {
         if (y == null || getClass() != y.getClass()) {
             return false;
         }
-        return this == y || ((Board) y).getHash().equals(getHash());
-    }
 
-    private String getHash() {
-        return stringBuilder.toString().replaceAll("/\n\t /", "");
+        Board board = (Board) y;
+
+        if (this == y) return true;
+        if (board.dimension != dimension ||
+                board.hamming != hamming ||
+                board.manhattanDistance != manhattanDistance) return false;
+
+        for (int yc = 0; yc < dimension; yc++) {
+            for (int x = 0; x < dimension; x++) {
+                if (this.blocks[yc][x] != board.blocks[yc][x]) return false;
+            }
+        }
+        return true;
     }
 
     // string representation of this board (in the output format specified below)
     public String toString() {
-       return stringBuilder.toString();
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(dimension).append("\n");
+
+        for (int y = 0; y < dimension; y++) {
+            for (int x = 0; x < dimension; x++) {
+                int value = this.blocks[y][x];
+                stringBuilder.append(value < 10 ? " " : "").append(value).append(" ");
+            }
+        }
+        return stringBuilder.toString();
     }
 
     private int getValueTargetX(int value, int targetY) {

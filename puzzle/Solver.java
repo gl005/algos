@@ -5,14 +5,6 @@ import java.util.Comparator;
 
 public class Solver {
 
-    private static final Comparator<SearchNode> MANHATTAN_COMPARATOR = (nodeA, nodeB) -> {
-        int manhattanResult = Comparator.comparingInt(SearchNode::getManhattanPriority).compare(nodeA, nodeB);
-        if (manhattanResult == 0) {
-            return Comparator.comparingInt(SearchNode::getHammingPriority).compare(nodeA, nodeB);
-        }
-        return manhattanResult;
-    };
-
     private final Board initialBoard;
 
     private SearchNode goalNode;
@@ -27,31 +19,32 @@ public class Solver {
 
     private void solvePuzzle() {
 
-        MinPQ<SearchNode> frontier = new MinPQ<>(initialBoard.dimension(), MANHATTAN_COMPARATOR);
-        SearchNode currentNode = new SearchNode(initialBoard, 0, false, null);
-        SearchNode twinNode = new SearchNode(initialBoard.twin(), 0, true, null);
+        MinPQ<SearchNode> frontier = new MinPQ<>(initialBoard.dimension(), (nodeA, nodeB) -> {
+            int manhattanResult = Comparator.comparingInt(SearchNode::getManhattanPriority).compare(nodeA, nodeB);
+            if (manhattanResult == 0) {
+                return Comparator.comparingInt(SearchNode::getHammingPriority).compare(nodeA, nodeB);
+            }
+            return manhattanResult;
+        });
+        SearchNode currentNode = new SearchNode(initialBoard, false, null);
+        if (currentNode.isGoalNode()) {
+            goalNode = currentNode;
+            solvable = true;
+            return;
+        }
+        SearchNode twinNode = new SearchNode(initialBoard.twin(), true, null);
 
         frontier.insert(currentNode);
         frontier.insert(twinNode);
 
-        int step = 0;
-        int twinStep = 0;
-
         while (!frontier.isEmpty()) {
             currentNode = frontier.delMin();
-            for (Board neighbour : currentNode.getBoard().neighbors()) {
-                if (currentNode.getPrevious() != null && currentNode.getPrevious().getBoard().equals(neighbour)) {
+            for (Board nextBoard : currentNode.getBoard().neighbors()) {
+                if (currentNode.getPrevious() != null && currentNode.getPrevious().getBoard().equals(nextBoard)) {
                     continue;
                 }
 
-                if (currentNode.isTwin()) {
-                    twinStep++;
-                }
-                else {
-                    step++;
-                }
-
-                SearchNode nextNode = new SearchNode(neighbour, currentNode.isTwin() ? twinStep : step, currentNode.isTwin(), currentNode);
+                SearchNode nextNode = new SearchNode(nextBoard, currentNode.isTwin(), currentNode);
                 // todo: check if node has been visited before adding it to the frontier, pretty hard if we're not allowed to implement hashCode
                 frontier.insert(nextNode);
 
@@ -102,27 +95,22 @@ public class Solver {
         // testPuzzle(new Board(new int[][]{{1,2,3},{4,5,6},{8,7,0}}));
     }
 
-    private static void testPuzzle(Board board) {
-        Solver solver = new Solver(board);
-        System.out.println("solvable? " + solver.isSolvable());
-        if (!solver.isSolvable()) return;
-        for (Board solutionStep : solver.solution()) {
-            System.out.println(solutionStep);
-            System.out.println(" ");
-        }
-    }
-
     private class SearchNode {
         private final Board board;
-        private final int steps;
         private final SearchNode previous;
         private final boolean isTwin;
+        private final int hammingPriority;
+        private final int manhattenPriority;
+        private final boolean goal;
 
-        private SearchNode(Board board, int steps, boolean isTwin, SearchNode previous) {
+        private SearchNode(Board board, boolean isTwin, SearchNode previous) {
             this.board = board;
-            this.steps = steps;
             this.previous = previous;
             this.isTwin = isTwin;
+            int steps = depth();
+            hammingPriority = steps + board.hamming();
+            manhattenPriority = steps + board.manhattan();
+            goal = board.isGoal();
         }
 
         boolean isTwin() {
@@ -130,7 +118,7 @@ public class Solver {
         }
 
         boolean isGoalNode() {
-            return board.isGoal();
+            return goal;
         }
 
         Board getBoard() {
@@ -146,11 +134,21 @@ public class Solver {
         }
 
         int getHammingPriority() {
-            return steps + board.hamming();
+            return hammingPriority;
         }
 
         int getManhattanPriority() {
-            return steps + board.manhattan();
+            return manhattenPriority;
+        }
+
+        int depth() {
+            int curStep = 0;
+            SearchNode node = this;
+            while(node.previous != null) {
+                curStep++;
+                node = node.previous;
+            }
+            return curStep;
         }
     }
 }
