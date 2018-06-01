@@ -1,19 +1,47 @@
-import edu.princeton.cs.algs4.MinPQ;
-
 import java.util.*;
 
 public class Board {
 
-    protected final int[][] blocks;
-    private int dimension;
-    private int blockCount;
+    private int blankX;
+    private int blankY;
+
+    private final int[][] blocks;
+    private final int dimension;
+    private final List<Integer> manhattenDistances = new ArrayList<>();
+    private final String stringValue;
 
     // construct a board from an n-by-n array of blocks
     // (where blocks[i][j] = block in row i, column j)
     public Board(int[][] blocks)  {
         this.blocks = deepCopy(blocks);
-        dimension = this.blocks.length;
-        blockCount = dimension * dimension;
+        this.dimension = this.blocks.length;
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(dimension+"\n");
+        for (int y = 0; y < dimension; y++) {
+            for (int x = 0; x < dimension; x++) {
+                int value = this.blocks[y][x];
+                int targetY, targetX;
+                sb.append((value == 0 ? " ": value) +"\t");
+
+                if (value == 0) {
+                    this.blankX = x;
+                    this.blankY = y;
+                }
+
+                targetY = getValueTargetY(value);
+                targetX = getValueTargetX(value, targetY);
+
+                if (targetY != y || targetX != x) {
+                    int manhattenDistance = Math.abs(targetX - x) + Math.abs(targetY - y);
+                    manhattenDistances.add(manhattenDistance);
+                }
+            }
+            sb.append("\n");
+        }
+        stringValue = sb.toString();
+
+
     }
 
     // board dimension n
@@ -23,13 +51,13 @@ public class Board {
 
     // number of blocks out of place
     public int hamming() {
-        return blocksOutOfPlace(false).size();
+        return manhattenDistances.size();
     }
 
     // sum of Manhattan distances between blocks and goal
     public int manhattan() {
         int sum = 0;
-        for (Integer distance: blocksOutOfPlace(false)) {
+        for (int distance: manhattenDistances) {
             sum += distance;
         }
         return sum;
@@ -37,42 +65,58 @@ public class Board {
 
     // is this board the goal board?
     public boolean isGoal() {
-        return blocksOutOfPlace(true).isEmpty();
+        return manhattenDistances.isEmpty();
     }
 
     // a board that is obtained by exchanging any pair of blocks
     public Board twin() {
-        return new Board(blocks);
+        int fromX = -1;
+        int fromY = -1;
+        int toX = -1;
+        int toY = -1;
+
+        for (int y = 0; y < dimension; y++) {
+            for (int x = 0; x < dimension; x++) {
+                if (y == blankY && x == blankX) continue;
+
+                if (fromX < 0) {
+                    fromX = x;
+                    fromY = y;
+                    continue;
+                }
+
+                if (toX < 0) {
+                    toX = x;
+                    toY = y;
+                    break;
+                }
+            }
+        }
+        return swap(fromY, fromX, toY, toX);
     }
 
     // all neighboring boards
     public Iterable<Board> neighbors() {
-        List<Board> neighbours = new ArrayList<>();
-        for (int i = 0; i < dimension; i++) {
-            for (int j = 0; j < dimension; j++) {
-                int value = blocks[i][j];
-                if (value != 0) continue;
+        List<Board> neighbours = new ArrayList<>(4);
 
-                //check upper neighbour
-                if (i > 0) {
-                    neighbours.add(swap(i, j, i-1, j));
-                }
-                //check right neighbour
-                if (j < dimension-1) {
-                    neighbours.add(swap(i, j, i, j+1));
-                }
-                //check lower neighbour
-                if (i < dimension-1) {
-                    neighbours.add(swap(i, j,  i+1, j));
-                }
-                //check left neighbour
-                if (j > 0) {
-                    neighbours.add(swap(i, j, i, j - 1));
-                }
-                return neighbours;
-            }
+        //check lower neighbour
+        if (blankY < dimension-1) {
+            neighbours.add(swap(blankY, blankX,  blankY+1, blankX));
         }
-        return null;
+        //check upper neighbour
+        if (blankY > 0) {
+            neighbours.add(swap(blankY, blankX, blankY-1, blankX));
+        }
+        //check right neighbour
+        if (blankX < dimension-1) {
+            neighbours.add(swap(blankY, blankX, blankY, blankX+1));
+        }
+        //check left neighbour
+        if (blankX > 0) {
+            neighbours.add(swap(blankY, blankX, blankY, blankX - 1));
+        }
+        return neighbours;
+
     }
 
     // does this board equal y?
@@ -80,50 +124,40 @@ public class Board {
         if (y == null || getClass() != y.getClass()) {
             return false;
         }
-        return this == y || Arrays.deepEquals(blocks, ((Board)y).blocks);
+        //return this == y || Arrays.deepEquals(blocks, ((Board)y).blocks);
+        return this == y || ((Board)y).getHash().equals(getHash());
+    }
+
+    private String getHash() {
+        return stringValue.replaceAll("/\n\t /", "");
     }
 
     // string representation of this board (in the output format specified below)
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        for (int[] row:blocks) {
-            for (int value:row) {
-                sb.append((value == 0 ? "-": value) +"\t");
-            }
-            sb.append("\n");
-        }
-        return sb.toString();
+       return stringValue;
     }
 
-
-    private List<Integer> blocksOutOfPlace(boolean breakOnFirst) {
-        int place = 1;
-        List<Integer> distanceOutOfPlace = new ArrayList<>();
-
-        for (int[] row : blocks) {
-            for (int value : row) {
-                int stepsToValue = Math.abs(value == 0 ? (blockCount - 1 - place): value - place);
-
-                if ((value == 0 && place != blockCount -1) || place != value) {
-                    distanceOutOfPlace.add(stepsToValue);
-                }
-
-                if (breakOnFirst && !distanceOutOfPlace.isEmpty()) {
-                    return distanceOutOfPlace;
-                }
-                place++;
-            }
+    private int getValueTargetX(int value, int targetY) {
+        if (value == 0) {
+            return targetY;
         }
-        return distanceOutOfPlace;
+        return value - ((dimension * targetY) + 1);
     }
 
-    private Board swap(int fromRow, int fromCell, int toRow, int toCell) {
+    private int getValueTargetY(int value) {
+        if (value == 0) {
+            return dimension-1;
+        }
+        return (int)Math.ceil(value / (double)dimension) -1;
+    }
+
+    private Board swap(int fromY, int fromX, int toY, int toX) {
         int[][] copy = deepCopy(blocks);
 
-        int fromValue = copy[fromRow][fromCell];
-        int toValue = copy[toRow][toCell];
-        copy[toRow][toCell] = fromValue;
-        copy[fromRow][fromCell] = toValue;
+        int fromValue = copy[fromY][fromX];
+        int toValue = copy[toY][toX];
+        copy[toY][toX] = fromValue;
+        copy[fromY][fromX] = toValue;
 
         return new Board(copy);
     }
@@ -151,15 +185,12 @@ public class Board {
         System.out.println("is goal: "+a.isGoal());
         System.out.println(" ");
 
-//        for (Board board : a.neighbors()) {
-//            System.out.print(board.toString());
-//            //System.out.println("is goal: "+board.isGoal());
-//            System.out.println("steps to goal: "+board.manhattan());
-//            System.out.println("blocks out of place: "+board.hamming());
-//            System.out.println(" ");
-//        }
-//
-//        System.out.println(a.equals(b));
-//        System.out.println(a.isGoal());
+        for (Board board : a.neighbors()) {
+            System.out.print(board.toString());
+            //System.out.println("is goal: "+board.isGoal());
+            System.out.println("steps to goal: "+board.manhattan());
+            System.out.println("blocks out of place: "+board.hamming());
+            System.out.println(" ");
+        }
     }
 }
