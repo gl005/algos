@@ -7,7 +7,7 @@ public class Board {
 
     private final int[][] blocks;
     private final int dimension;
-    private final List<Integer> manhattenDistances = new ArrayList<>();
+    private final List<Integer> manhattanDistances = new ArrayList<>();
     private final String stringValue;
 
     // construct a board from an n-by-n array of blocks
@@ -17,12 +17,12 @@ public class Board {
         this.dimension = this.blocks.length;
 
         StringBuilder sb = new StringBuilder();
-        sb.append(dimension+"\n");
+        sb.append(dimension).append("\n");
         for (int y = 0; y < dimension; y++) {
             for (int x = 0; x < dimension; x++) {
                 int value = this.blocks[y][x];
                 int targetY, targetX;
-                sb.append((value == 0 ? " ": value) +"\t");
+                sb.append(value == 0 ? " ": value).append("\t");
 
                 if (value == 0) {
                     this.blankX = x;
@@ -33,15 +33,13 @@ public class Board {
                 targetX = getValueTargetX(value, targetY);
 
                 if (targetY != y || targetX != x) {
-                    int manhattenDistance = Math.abs(targetX - x) + Math.abs(targetY - y);
-                    manhattenDistances.add(manhattenDistance);
+                    int manhattanDistance = Math.abs(targetX - x) + Math.abs(targetY - y);
+                    manhattanDistances.add(manhattanDistance);
                 }
             }
             sb.append("\n");
         }
         stringValue = sb.toString();
-
-
     }
 
     // board dimension n
@@ -51,13 +49,13 @@ public class Board {
 
     // number of blocks out of place
     public int hamming() {
-        return manhattenDistances.size();
+        return manhattanDistances.size();
     }
 
     // sum of Manhattan distances between blocks and goal
     public int manhattan() {
         int sum = 0;
-        for (int distance: manhattenDistances) {
+        for (int distance: manhattanDistances) {
             sum += distance;
         }
         return sum;
@@ -65,7 +63,7 @@ public class Board {
 
     // is this board the goal board?
     public boolean isGoal() {
-        return manhattenDistances.isEmpty();
+        return manhattanDistances.isEmpty();
     }
 
     // a board that is obtained by exchanging any pair of blocks
@@ -139,6 +137,7 @@ public class Board {
 
     private int getValueTargetX(int value, int targetY) {
         if (value == 0) {
+            // noinspection SuspiciousNameCombination
             return targetY;
         }
         return value - ((dimension * targetY) + 1);
@@ -177,7 +176,6 @@ public class Board {
     // unit tests (not graded)
     public static void main(String[] args) {
         Board a = new Board(new int[][]{{0,1,3},{4,2,5},{7,8,6}});
-        Board b = new Board(new int[][]{{1,2,3,4},{5,6,7,8},{9,10,11,12},{13,14,15,0}});
 
         System.out.print(a.toString());
         System.out.println("steps to goal: "+a.manhattan());

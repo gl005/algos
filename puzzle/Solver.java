@@ -8,8 +8,10 @@ public class Solver {
 
     private SearchNode goalNode;
 
+    private boolean solvable = false;
+
     private final static Comparator<SearchNode> MANHATTAN_COMPARATOR = (nodeA, nodeB) -> {
-        int manhattanResult = Comparator.comparingInt(SearchNode::getManhattenPriority).compare(nodeA, nodeB);
+        int manhattanResult = Comparator.comparingInt(SearchNode::getManhattanPriority).compare(nodeA, nodeB);
         if (manhattanResult == 0) {
             return Comparator.comparingInt(SearchNode::getHammingPriority).compare(nodeA, nodeB);
         }
@@ -25,40 +27,53 @@ public class Solver {
     private void solvePuzzle() {
 
         MinPQ<SearchNode> frontier = new MinPQ<>(initialBoard.dimension(), MANHATTAN_COMPARATOR);
-        SearchNode currentNode = new SearchNode(initialBoard, 0, null);
+        SearchNode currentNode = new SearchNode(initialBoard, 0, false, null);
+        SearchNode twinNode = new SearchNode(initialBoard.twin(), 0, true, null);
+
+        frontier.insert(currentNode);
+        frontier.insert(twinNode);
 
         int step = 0;
-        Set<Board> visited = new HashSet<>();
-        for (frontier.insert(currentNode); !frontier.isEmpty(); currentNode = frontier.delMin()) {
+        int twinStep = 0;
+
+        while (!frontier.isEmpty()) {
+            currentNode = frontier.delMin();
             for (Board neighbour : currentNode.getBoard().neighbors()) {
                 if (currentNode.getBoard().equals(neighbour) ||
                         (currentNode.getPrevious() != null && currentNode.getPrevious().getBoard().equals(neighbour))) {
                     continue;
                 }
 
-                SearchNode nextNode = new SearchNode(neighbour, step, currentNode);
-                if (!visited.contains(neighbour)) {
-                    step++;
-                    frontier.insert(nextNode);
-                    visited.add(neighbour);
+                if (currentNode.isTwin()) {
+                    twinStep++;
                 }
+                else {
+                    step++;
+                }
+
+                SearchNode nextNode = new SearchNode(neighbour, currentNode.isTwin() ? twinStep: step, currentNode.isTwin(), currentNode);
+                // todo: check if node has been visited before adding it to the frontier, pretty hard if it's not allowed to implement hashCode
+                frontier.insert(nextNode);
 
                 if (nextNode.isGoalNode()) {
                     goalNode = nextNode;
+                    solvable = !goalNode.isTwin();
                     return;
                 }
             }
         }
+
     }
 
     // is the initial board solvable?
     public boolean isSolvable() {
-        return goalNode == null;
+        return solvable;
     }
 
     // min number of moves to solve initial board; -1 if unsolvable
     public int moves() {
-        return goalNode == null ? -1: (composeSolution().size()-1);
+        Deque<Board> steps = composeSolution();
+        return solvable && steps != null ? (steps.size() - 1): -1;
     }
 
     // sequence of boards in a shortest solution; null if unsolvable
@@ -67,7 +82,7 @@ public class Solver {
     }
 
     private Deque<Board> composeSolution() {
-        if (goalNode == null) {
+        if (!solvable) {
             return null;
         }
         Deque<Board> solution = new Deque<>();
@@ -91,6 +106,7 @@ public class Solver {
     private static void testPuzzle(Board board) {
         Solver solver = new Solver(board);
         System.out.println(solver.isSolvable());
+        if (!solver.isSolvable()) return;
         for (Board solutionStep : solver.solution()) {
             System.out.println(solutionStep);
             System.out.println(" ");
@@ -101,38 +117,40 @@ public class Solver {
         private final Board board;
         private final int steps;
         private final SearchNode previous;
+        private final boolean isTwin;
 
-        private SearchNode(Board board, int steps, SearchNode previous) {
+        private SearchNode(Board board, int steps, boolean isTwin, SearchNode previous) {
             this.board = board;
             this.steps = steps;
             this.previous = previous;
+            this.isTwin = isTwin;
         }
 
-        public boolean isGoalNode() {
+        boolean isTwin() {
+            return isTwin;
+        }
+
+        boolean isGoalNode() {
             return board.isGoal();
         }
 
-        public int getSteps() {
-            return steps;
-        }
-
-        public Board getBoard() {
+        Board getBoard() {
             return board;
         }
 
-        public SearchNode getPrevious() {
+        SearchNode getPrevious() {
             return previous;
         }
 
-        public boolean isStartNode() {
+        boolean isStartNode() {
             return previous == null;
         }
 
-        public int getHammingPriority() {
+        int getHammingPriority() {
             return steps + board.hamming();
         }
 
-        public int getManhattenPriority() {
+        int getManhattanPriority() {
             return steps + board.manhattan();
         }
     }
