@@ -28,9 +28,23 @@
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdOut;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
 public class PuzzleChecker {
 
     public static void main(String[] args) {
+
+
+        if (args.length == 1 && args[0].equals("ALL")) {
+            List<String> allFiles = new ArrayList<>();
+            for (int i = 5; i < 44; i++) {
+                String num = i < 10 ? "0" + i : String.valueOf(i);
+                allFiles.add("data/puzzle" + num + ".txt");
+            }
+            args = allFiles.toArray(new String[]{});
+        }
 
         // for each command-line argument
         for (String filename : args) {
@@ -46,9 +60,23 @@ public class PuzzleChecker {
             }
 
             // solve the slider puzzle
+            Instant boardStart = Instant.now();
             Board initial = new Board(tiles);
+            Instant boardEnd = Instant.now();
+            double boardTime = getRunTime(boardStart, boardEnd);
+
+            Instant solverStart = Instant.now();
             Solver solver = new Solver(initial);
-            StdOut.println(filename + ": " + solver.moves());
+            Instant solverEnd = Instant.now();
+            double solverTime = getRunTime(solverStart, solverEnd);
+
+            StdOut.println(filename + ";" + solver.moves() + ";" + initial.dimension() + ";" + boardTime + ";" + solverTime + ";");
         }
     }
+
+    private static double getRunTime(Instant start, Instant end) {
+        return (double) (end.toEpochMilli() - start.toEpochMilli()) / 1000;
+    }
+
+
 }

@@ -14,8 +14,10 @@ public class Board {
 
     // construct a board from an n-by-n array of blocks
     // (where blocks[i][j] = block in row i, column j)
-    public Board(int[][] blocks)  {
-        if (blocks == null) throw new IllegalArgumentException();
+    public Board(int[][] blocks) {
+        if (blocks == null) {
+            throw new IllegalArgumentException();
+        }
         this.blocks = deepCopy(blocks);
         this.dimension = this.blocks.length;
         int hammingCode = 0;
@@ -73,7 +75,9 @@ public class Board {
 
         for (int y = 0; y < dimension; y++) {
             for (int x = 0; x < dimension; x++) {
-                if (y == blankY && x == blankX) continue;
+                if (y == blankY && x == blankX) {
+                    continue;
+                }
 
                 if (fromX < 0) {
                     fromX = x;
@@ -96,16 +100,16 @@ public class Board {
         List<Board> neighbours = new ArrayList<>(4);
 
         // check lower neighbour
-        if (blankY < dimension-1) {
-            neighbours.add(swap(blankY, blankX,  blankY+1, blankX));
+        if (blankY < dimension - 1) {
+            neighbours.add(swap(blankY, blankX, blankY + 1, blankX));
         }
         // check upper neighbour
         if (blankY > 0) {
-            neighbours.add(swap(blankY, blankX, blankY-1, blankX));
+            neighbours.add(swap(blankY, blankX, blankY - 1, blankX));
         }
         // check right neighbour
-        if (blankX < dimension-1) {
-            neighbours.add(swap(blankY, blankX, blankY, blankX+1));
+        if (blankX < dimension - 1) {
+            neighbours.add(swap(blankY, blankX, blankY, blankX + 1));
         }
         // check left neighbour
         if (blankX > 0) {
@@ -123,14 +127,20 @@ public class Board {
 
         Board board = (Board) y;
 
-        if (this == y) return true;
+        if (this == y) {
+            return true;
+        }
         if (board.dimension != dimension ||
                 board.hamming != hamming ||
-                board.manhattanDistance != manhattanDistance) return false;
+                board.manhattanDistance != manhattanDistance) {
+            return false;
+        }
 
         for (int yc = 0; yc < dimension; yc++) {
             for (int x = 0; x < dimension; x++) {
-                if (this.blocks[yc][x] != board.blocks[yc][x]) return false;
+                if (this.blocks[yc][x] != board.blocks[yc][x]) {
+                    return false;
+                }
             }
         }
         return true;
@@ -162,7 +172,7 @@ public class Board {
         if (value == 0) {
             return dimension - 1;
         }
-        return (int) Math.ceil(value / (double) dimension) -1;
+        return (int) Math.ceil(value / (double) dimension) - 1;
     }
 
     private Board swap(int fromY, int fromX, int toY, int toX) {

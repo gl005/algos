@@ -13,13 +13,16 @@ public class Solver {
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
-        if (initial == null) throw new IllegalArgumentException();
+        if (initial == null) {
+            throw new IllegalArgumentException();
+        }
         this.initialBoard = initial;
+
         solvePuzzle();
+
     }
 
     private void solvePuzzle() {
-
         MinPQ<SearchNode> frontier = new MinPQ<>(initialBoard.dimension(), (nodeA, nodeB) -> {
             int manhattanResult = Comparator.comparingInt(SearchNode::getManhattanPriority).compare(nodeA, nodeB);
             if (manhattanResult == 0) {
@@ -41,7 +44,7 @@ public class Solver {
         while (!frontier.isEmpty()) {
             currentNode = frontier.delMin();
             for (Board nextBoard : currentNode.getBoard().neighbors()) {
-                if ((currentNode.getPrevious() != null && currentNode.getPrevious().getBoard().equals(nextBoard)) || currentNode.descendsFrom(nextBoard)) {
+                if (currentNode.descendsFrom(nextBoard, 1)) {
                     continue;
                 }
 
@@ -95,12 +98,13 @@ public class Solver {
         private final int hammingPriority;
         private final int manhattenPriority;
         private final boolean goal;
+        private final int steps;
 
         private SearchNode(Board board, boolean isTwin, SearchNode previous) {
             this.board = board;
             this.previous = previous;
             this.isTwin = isTwin;
-            int steps = depth();
+            this.steps = previous == null ? 0 : previous.steps + 1;
             hammingPriority = steps + board.hamming();
             manhattenPriority = steps + board.manhattan();
             goal = board.isGoal();
@@ -134,35 +138,27 @@ public class Solver {
             return manhattenPriority;
         }
 
-        boolean descendsFrom(Board board) {
+        boolean descendsFrom(Board parent, int maxDepth) {
             SearchNode node = this;
-            while (node.previous != null) {
-                if (node.previous.equals(board)) {
+            int level = 0;
+            while (!node.isStartNode() && level < maxDepth) {
+                if (node.previous.getBoard().equals(parent)) {
                     return true;
                 }
+                level++;
                 node = node.previous;
             }
             return false;
-        }
-
-        int depth() {
-            int curStep = 0;
-            SearchNode node = this;
-            while (node.previous != null) {
-                curStep++;
-                node = node.previous;
-            }
-            return curStep;
         }
 
         ArrayDeque<Board> ancestors() {
             ArrayDeque<Board> ancestors = new ArrayDeque<>();
             SearchNode current = goalNode;
             while (!current.isStartNode()) {
-                ancestors.addFirst(current.getBoard());
-                current = current.getPrevious();
+                ancestors.addFirst(current.board);
+                current = current.previous;
             }
-            ancestors.addFirst(current.getBoard());
+            ancestors.addFirst(current.board);
             return ancestors;
         }
     }
